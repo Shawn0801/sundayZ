@@ -1,0 +1,30 @@
+<div class="container" appBasicHighlight>
+  <div class="row">
+    <div class="col-8">
+      <h1>Directive</h1>
+      <button class="btn btn-primary" (click)="onChangeColorStatus()"> 改變深淺 </button>
+      <!-- 1 -->
+      <h4>ngStyle</h4>
+      <p [ngStyle]="{backgroundColor: getColor()}">呈現顏色</p>
+      <!-- 2 -->
+      <h4>ngClass</h4>
+      <p [ngClass]="{ colorStatus: this.colorStatus === '淺' }">
+        呈現顏色
+      </p>
+      <!-- 舊寫法 -->
+      <div>舊</div>
+      <p *ngIf="this.colorStatus === '淺'; else isDark">是 淺</p>
+      <ng-template #isDark>
+        是 深 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      </ng-template>
+      <!-- 新寫法 -->
+      <div>新</div>
+      @if (this.colorStatus === '淺') {
+      是 淺
+      }
+      @else {
+      是 深 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      }
+    </div>
+  </div>
+</div>

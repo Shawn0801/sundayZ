@@ -1,0 +1,7 @@
+{
+  "/api": {
+    "target": "https://data.gov.tw",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

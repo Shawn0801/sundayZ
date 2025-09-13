@@ -1,0 +1,39 @@
+<!-- <p>form works!</p>
+<button (click)="redirectTable()">go to table</button>
+<app-table></app-table>
+
+<input type="text" ngModel>
+<input type="text" [ngModel]="id">
+<input type="text" [(ngModel)]="id">
+
+<div>{{id}}</div> -->
+
+<form #f="ngForm">
+  <div ngModelGroup="userData">
+    <div>
+      <p>使用者姓名</p>
+      <input type="text" name="username" ngModel required #username="ngModel" />
+      @if (username.invalid && username.touched) {
+      <span>請輸入使用者姓名</span>
+      }
+    </div>
+
+    <div>
+      <p>電子信箱</p>
+      <input type="email" name="email" ngModel email #email="ngModel" />
+      @if (email.invalid && email.dirty) {
+      <span>請輸入正確電子信箱</span>
+      }
+    </div>
+
+    <div>
+      <p>出身地</p>
+      <select name="city" ngModel>
+        @for (item of citySelect; track item) {
+        <option [value]="item.value">{{item.label}}</option>
+        }
+      </select>
+    </div>
+  </div>
+  <button class="btn btn-primary" (click)="onSumbit(f)" [disabled]='f.invalid'>送出</button>
+</form>

@@ -1,0 +1,19 @@
+<div class="container">
+  <div class="row">
+    <div class="col-8">
+      <h1>Pipe</h1>
+      <h4>文字轉換</h4>
+      <p>{{ text | slice:1:3 }}</p>
+      <p>{{ text | uppercase }}</p>
+      <p>{{ text | lowercase }}</p>
+
+      <input type="text" [(ngModel)]="testMask.text">
+
+      <p>{{ testMask | mask }}</p>
+      <h4>時間轉換</h4>
+      <p>{{ now | date: 'M/d/yy, h:mm a' }}</p>
+      <p>{{ now | date: 'medium' }}</p>
+      <p>{{ now | date: 'medium' | uppercase }}</p>
+    </div>
+  </div>
+</div>
