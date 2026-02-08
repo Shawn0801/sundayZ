@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { day } from '../core/enums/day';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { PesticideType } from '../interfaces/res';
+import { HttpClient } from '@angular/common/http';
+import { PesticideType, WeatherInfo } from '../interfaces/PesticideTypeRes';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +18,11 @@ export class DataService {
   getData() {
     const url = 'https://data.moa.gov.tw/api/v1/PesticideType/';
     return this.http.get<PesticideType>(url);
+  }
+
+  getWeather() {
+    const url = 'https://data.moa.gov.tw/api/v1/AutoWeatherStationType/';
+    return this.http.get<WeatherInfo>(url);
   }
 
   postData() {

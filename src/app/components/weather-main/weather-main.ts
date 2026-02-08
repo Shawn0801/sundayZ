@@ -1,8 +1,14 @@
 import { Component } from '@angular/core';
+import { CardModule } from 'primeng/card';
+import { TaiwanMap } from '../taiwan-map/taiwan-map';
+
 
 @Component({
   selector: 'app-weather-main',
-  imports: [],
+  standalone: true,
+  imports: [CardModule,
+    TaiwanMap
+  ],
   templateUrl: './weather-main.html',
   styleUrl: './weather-main.scss'
 })

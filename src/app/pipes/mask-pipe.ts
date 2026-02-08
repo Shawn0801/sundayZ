@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { TextObject } from '../interfaces/res';
+import { TextObject } from '../interfaces/PesticideTypeRes';
 
 @Pipe({
   name: 'mask',

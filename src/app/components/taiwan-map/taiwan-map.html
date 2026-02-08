@@ -1,0 +1,35 @@
+<div class="taiwan-map-container">
+
+  <div class="map-content">
+    @if (isLoading) {
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>地圖載入中...</p>
+    </div>
+    }
+
+    <div class="map-container" #mapContainer>
+      <!-- D3.js 地圖將在這裡渲染 -->
+    </div>
+
+
+    @if (selectedCounty) {
+    <div class="info-panel">
+      <div class="county-info">
+        <h3>{{ selectedCounty.name }}</h3>
+        <div class="info-item">
+          <span class="label">人口：</span>
+          <span class="value">{{ selectedCounty.population }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">特色：</span>
+          <span class="value">{{ selectedCounty.description }}</span>
+        </div>
+        <button class="close-btn" (click)="selectedCounty = null" title="關閉">×</button>
+      </div>
+    </div>
+    }
+  </div>
+
+
+</div>

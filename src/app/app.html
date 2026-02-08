@@ -1,2 +1,7 @@
-<p-button class="dark" label="Check" />
-<p-datepicker [(ngModel)]="date" />
+<!-- 左側選單 (固定左側) -->
+<app-menu></app-menu>
+
+<!-- 右側主要內容區 (使用 router-outlet 動態切換頁面) -->
+<main style="margin-left: 256px; min-height: 100vh; background: #FCFAF8; padding: 24px;">
+  <router-outlet></router-outlet>
+</main>

@@ -1,35 +1,17 @@
 import { Routes } from '@angular/router';
-import { Table } from './components/table/table';
-import { Form } from './components/form/form';
-import { Home } from './components/home/home';
-import { Child } from './components/child/child';
+import { Dashboard } from './components/dashboard/dashboard';
 
 export const routes: Routes = [
+  // 預設路由：導向 Dashboard
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+
+  // Dashboard 主頁面 - 顯示所有功能的 2x2 網格
   {
-    path: 'home',
-    component: Home,
-    children: [
-      {
-        path: 'table',
-        component: Table
-      },
-    ]
+    path: 'dashboard',
+    component: Dashboard,
+    title: '首頁儀表板'
   },
-  {
-    path: 'fff',
-    redirectTo: '/table',
-    pathMatch: 'prefix'
-  },
-  {
-    path: 'table',
-    component: Table
-  },
-  {
-    path: 'child',
-    component: Child
-  },
-  {
-    path: 'form',
-    component: Form
-  }
+
+  // 404 路由
+  { path: '**', redirectTo: '/dashboard' }
 ];

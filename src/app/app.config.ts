@@ -18,8 +18,13 @@ export const appConfig: ApplicationConfig = {
       theme: {
         preset: Aura,
         options: {
-          darkModeSelector: 'class',
-          cssLayer: false
+          // 使用 Tailwind CSS 前綴，與 Tailwind 配色整合
+          prefix: 'p',
+          darkModeSelector: '.dark',
+          cssLayer: {
+            name: 'primeng',
+            order: 'tailwind-base, primeng, tailwind-utilities'
+          }
         }
       }
     })
