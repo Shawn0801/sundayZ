@@ -1,0 +1,120 @@
+.success-dialog-container {
+  padding: 2rem;
+  text-align: center;
+  max-width: 450px;
+}
+
+.success-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(45, 90, 39, 0.1); /* primary-500 淡背景（森林深綠） */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: successPulse 0.6s ease-out;
+
+  svg {
+    width: 36px;
+    height: 36px;
+    color: #2D5A27; /* primary-500 森林深綠 */
+    animation: checkmark 0.6s ease-out;
+  }
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes checkmark {
+  0% {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.success-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1B3617; /* primary-700 */
+  margin: 0 0 1rem 0;
+}
+
+.success-message {
+  font-size: 1rem;
+  color: #353935; /* text-DEFAULT */
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+}
+
+.action-hint {
+  background: #E8F2E6; /* primary-50 */
+  border: 1px solid #D1E5CD; /* primary-100 */
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #24481F; /* primary-600 */
+
+  .hint-icon {
+    width: 18px;
+    height: 18px;
+    color: #2D5A27; /* primary-500 */
+    flex-shrink: 0;
+  }
+
+  span {
+    text-align: left;
+    line-height: 1.5;
+  }
+}
+
+.success-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.btn-confirm {
+  background: #2D5A27; /* primary-500 森林深綠 */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #24481F; /* primary-600 */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(45, 90, 39, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}

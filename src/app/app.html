@@ -2,6 +2,6 @@
 <app-menu></app-menu>
 
 <!-- 右側主要內容區 (使用 router-outlet 動態切換頁面) -->
-<main style="margin-left: 256px; min-height: 100vh; background: #FCFAF8; padding: 24px;">
+<main [style.margin-left]="mainMarginLeft()" style="min-height: 100vh; background: #FCFAF8; padding: 24px; transition: margin-left 300ms ease-in-out;">
   <router-outlet></router-outlet>
 </main>

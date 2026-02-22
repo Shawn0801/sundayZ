@@ -1,90 +1,27 @@
-<!-- 需改成打api -->
-<div style="
-  background: linear-gradient(135deg, #2D5A27 0%, #479737 100%);
-  border-radius: 12px;
-  padding: 16px 24px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 2px 8px rgba(45, 90, 39, 0.2);
-">
-  <div style="display: flex; align-items: center;">
+<div
+  class="bg-gradient-to-br from-primary to-primary-400 rounded-xl px-6 py-4 overflow-hidden relative shadow-lg shadow-primary/20">
+  <div class="flex items-center">
     <!-- 圖示 -->
-    <i class="pi pi-megaphone" style="
-      font-size: 24px;
-      color: white;
-      margin-right: 16px;
-    "></i>
+    <i class="pi pi-megaphone text-2xl text-white mr-4"></i>
 
     <!-- 跑馬燈容器 -->
-    <div style="
-      flex: 1;
-      overflow: hidden;
-      position: relative;
-      height: 32px;
-    ">
-      <div class="marquee-content" style="
-        display: flex;
-        align-items: center;
-        white-space: nowrap;
-        animation: marquee 30s linear infinite;
-      ">
-        <span style="
-          color: white;
-          font-size: 16px;
-          font-weight: 500;
-          margin-right: 48px;
-        ">🌤️ 今日天氣：晴天，適合噴灑農藥</span>
-
-        <span style="
-          color: white;
-          font-size: 16px;
-          font-weight: 500;
-          margin-right: 48px;
-        ">📈 市場快訊：高麗菜價格上漲 15%</span>
-
-        <span style="
-          color: white;
-          font-size: 16px;
-          font-weight: 500;
-          margin-right: 48px;
-        ">💧 灌溉提醒：本週末預計降雨，請提前規劃灌溉</span>
-
-        <span style="
-          color: white;
-          font-size: 16px;
-          font-weight: 500;
-          margin-right: 48px;
-        ">🌱 農事建議：適合種植季節性蔬菜</span>
+    <div class="flex-1 overflow-hidden relative h-8">
+      @if (isLoading) {
+      <div class="flex items-center h-full">
+        <span class="text-white text-base font-medium">載入中...</span>
+      </div>
+      } @else {
+      <div class="marquee-content flex items-center whitespace-nowrap animate-marquee">
+        @for (item of marqueeItems; track $index) {
+        <span class="text-white text-base font-medium mr-12">{{ item }}</span>
+        }
 
         <!-- 複製一份內容以實現無縫循環 -->
-        <span style="
-          color: white;
-          font-size: 16px;
-          font-weight: 500;
-          margin-right: 48px;
-        ">🌤️ 今日天氣：晴天，適合噴灑農藥</span>
-
-        <span style="
-          color: white;
-          font-size: 16px;
-          font-weight: 500;
-          margin-right: 48px;
-        ">📈 市場快訊：高麗菜價格上漲 15%</span>
-
-        <span style="
-          color: white;
-          font-size: 16px;
-          font-weight: 500;
-          margin-right: 48px;
-        ">💧 灌溉提醒：本週末預計降雨，請提前規劃灌溉</span>
-
-        <span style="
-          color: white;
-          font-size: 16px;
-          font-weight: 500;
-          margin-right: 48px;
-        ">🌱 農事建議：適合種植季節性蔬菜</span>
+        @for (item of marqueeItems; track $index) {
+        <span class="text-white text-base font-medium mr-12">{{ item }}</span>
+        }
       </div>
+      }
     </div>
   </div>
 </div>
@@ -102,5 +39,9 @@
 
   .marquee-content {
     display: inline-flex;
+  }
+
+  .animate-marquee {
+    animation: marquee 200s linear infinite;
   }
 </style>

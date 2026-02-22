@@ -1,1 +1,66 @@
-<p>spray works!</p>
+<div class="flex flex-col gap-4">
+
+  <!-- 土壤濕度預估 -->
+  <div>
+    <h3 class="text-sm font-semibold text-primary mb-0.5">土壤濕度預估</h3>
+    <p class="text-xs text-surface-400 mb-3">根據近24h雨量推算</p>
+
+    <div class="flex flex-col items-center gap-2">
+      <!-- 水波動畫圓形儀表 -->
+      <div class="relative w-32 h-32">
+        <div class="water-gauge" [style.background-color]="soilStatusInfo.gaugeStroke">
+          <!-- 水波容器 -->
+          <div class="water-container" [style.height.%]="soilHumidity || 65">
+            <div class="water-wave water-wave--front"></div>
+            <div class="water-wave water-wave--back"></div>
+          </div>
+
+          <!-- 百分比數值 -->
+          <div class="water-label">
+            <span class="text-2xl font-bold text-white">{{ soilHumidity }}</span>
+            <span class="text-sm font-semibold text-white">%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 狀態文字 -->
+      <p class="text-xs text-center leading-relaxed font-medium" [ngClass]="soilStatusInfo.textClass">
+        {{ soilStatusInfo.label }}
+      </p>
+    </div>
+  </div>
+
+  <div class="border-t border-surface-200"></div>
+
+  <!-- 環境即時觀測 -->
+  <div>
+    <h3 class="text-sm font-semibold text-primary mb-0.5">環境即時觀測</h3>
+    <p class="text-xs text-surface-400 mb-3">{{ stationName }} 即時資料</p>
+
+    <div class="flex flex-col gap-3">
+      <!-- 空氣溫度 -->
+      <div class="flex items-center justify-between">
+        <span class="text-xs text-surface-500">空氣溫度</span>
+        <span class="text-sm font-semibold text-danger-500">{{ temperature }} °C</span>
+      </div>
+
+      <!-- 空氣濕度 -->
+      <div class="flex items-center justify-between gap-3">
+        <span class="text-xs text-surface-500 shrink-0">空氣濕度</span>
+        <div class="flex items-center gap-2 flex-1">
+          <div class="flex-1 h-1.5 bg-surface-200 rounded-full overflow-hidden">
+            <div class="h-full bg-info-400 rounded-full transition-all duration-500" [style.width.%]="humidity"></div>
+          </div>
+          <span class="text-xs font-medium text-surface-600 w-10 text-right">{{ humidity }} %</span>
+        </div>
+      </div>
+
+      <!-- 24h 累積雨量 -->
+      <div class="flex items-center justify-between">
+        <span class="text-xs text-surface-500">24h 累積雨量</span>
+        <span class="text-xs font-medium bg-info-50 text-info-700 px-2 py-0.5 rounded-full">{{ rainfall }} mm</span>
+      </div>
+    </div>
+  </div>
+
+</div>

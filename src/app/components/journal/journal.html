@@ -1,1 +1,129 @@
-<p>journal works!</p>
+<div class="flex flex-col gap-4">
+
+  <!-- PHI 安全採收期警示 -->
+  @if (activePesticideEntry && phiRemainingDays > 0) {
+    <div class="bg-danger-50 border-l-4 border-danger-500 rounded-lg p-3">
+      <div class="flex items-center gap-2 mb-2">
+        <i class="pi pi-exclamation-triangle text-danger-600"></i>
+        <span class="text-xs font-semibold text-danger-700">安全採收期倒數</span>
+      </div>
+
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-xs font-medium text-text-500">{{ activePesticideEntry.targetCrop }}</span>
+        <span class="text-sm font-bold text-danger-500">剩 {{ phiRemainingDays }} 天</span>
+      </div>
+
+      <!-- 進度條 -->
+      <div class="w-full h-1.5 bg-surface-200 rounded-full overflow-hidden mb-2">
+        <div
+          class="h-full bg-gradient-to-r from-danger-300 to-danger-500 rounded-full transition-all duration-300"
+          [style.width.%]="phiProgressPercent">
+        </div>
+      </div>
+
+      <div class="flex justify-between text-xs text-surface-500">
+        <span>{{ activePesticideEntry.itemName }}</span>
+        <span>3天前噴灑</span>
+      </div>
+    </div>
+  }
+
+  <div class="border-t border-surface-200"></div>
+
+  <!-- 農務日曆 -->
+  <div>
+    <h3 class="text-sm font-semibold text-primary mb-0.5">農務日曆</h3>
+    <p class="text-xs text-surface-400 mb-3">點選日期查看紀錄</p>
+
+    <p-datepicker
+      [(ngModel)]="selectedDate"
+      (onSelect)="onDateSelect()"
+      [inline]="true"
+      dateFormat="yy/mm/dd"
+      [showWeek]="false"
+    />
+  </div>
+
+  <div class="border-t border-surface-200"></div>
+
+  <!-- 選定日期的紀錄 -->
+  <div>
+    <h3 class="text-sm font-semibold text-primary mb-0.5">
+      {{ selectedDate | date:'M/d' }} 的紀錄
+    </h3>
+    <p class="text-xs text-surface-400 mb-3">共 {{ entriesForSelectedDate.length }} 筆</p>
+
+    @if (entriesForSelectedDate.length > 0) {
+      <div class="flex flex-col gap-2">
+        @for (entry of entriesForSelectedDate; track entry.id) {
+          <div class="bg-beige-100 rounded-lg p-2.5 border border-beige-300 hover:bg-beige-200 transition-colors">
+            <div class="flex items-start gap-2">
+              <i class="pi {{ JournalTypeIcons[entry.type] }} text-base flex-shrink-0" [ngClass]="JournalTypeColors[entry.type]"></i>
+
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-xs font-semibold text-text-500">{{ JournalTypeLabels[entry.type] }}</span>
+                  <span class="text-xs text-surface-400">{{ formatTime(entry.timestamp) }}</span>
+                </div>
+
+                @if (entry.itemName) {
+                  <div class="text-xs text-text mb-0.5">
+                    {{ entry.itemName }}
+                    @if (entry.quantity) {
+                      <span class="text-surface-400">• {{ entry.quantity }} {{ entry.unit }}</span>
+                    }
+                  </div>
+                }
+
+                @if (entry.notes) {
+                  <p class="text-xs text-surface-500 line-clamp-2">{{ entry.notes }}</p>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="text-xs text-surface-400 text-center py-3">此日期無紀錄</p>
+    }
+  </div>
+
+  <div class="border-t border-surface-200"></div>
+
+  <!-- 快速操作 -->
+  <div>
+    <h3 class="text-sm font-semibold text-primary mb-0.5">快速紀錄</h3>
+    <p class="text-xs text-surface-400 mb-3">一鍵新增農務作業</p>
+
+    <div class="grid grid-cols-2 gap-2">
+      <button
+        (click)="onQuickActionPesticide()"
+        class="flex flex-col items-center justify-center gap-1 py-2.5 px-2 bg-beige-50 border border-danger-200 text-danger-600 rounded-lg hover:bg-danger-50 hover:border-danger-300 transition-all active:scale-95">
+        <i class="pi pi-shield text-lg"></i>
+        <span class="text-xs font-medium">噴藥</span>
+      </button>
+
+      <button
+        (click)="onQuickActionFertilizer()"
+        class="flex flex-col items-center justify-center gap-1 py-2.5 px-2 bg-beige-50 border border-primary-200 text-primary-600 rounded-lg hover:bg-primary-50 hover:border-primary-300 transition-all active:scale-95">
+        <i class="pi pi-seedling text-lg"></i>
+        <span class="text-xs font-medium">施肥</span>
+      </button>
+
+      <button
+        (click)="onQuickActionHarvest()"
+        class="flex flex-col items-center justify-center gap-1 py-2.5 px-2 bg-beige-50 border border-accent-300 text-accent-700 rounded-lg hover:bg-accent-50 hover:border-accent-400 transition-all active:scale-95">
+        <i class="pi pi-shopping-bag text-lg"></i>
+        <span class="text-xs font-medium">採收</span>
+      </button>
+
+      <button
+        (click)="onQuickActionObservation()"
+        class="flex flex-col items-center justify-center gap-1 py-2.5 px-2 bg-beige-50 border border-secondary-300 text-secondary-700 rounded-lg hover:bg-secondary-50 hover:border-secondary-400 transition-all active:scale-95">
+        <i class="pi pi-eye text-lg"></i>
+        <span class="text-xs font-medium">筆記</span>
+      </button>
+    </div>
+  </div>
+
+</div>

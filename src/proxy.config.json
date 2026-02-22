@@ -3,5 +3,13 @@
     "target": "https://data.gov.tw",
     "secure": false,
     "changeOrigin": true
+  },
+  "/moa-api": {
+    "target": "https://data.moa.gov.tw",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/moa-api": "/api/v1"
+    }
   }
 }

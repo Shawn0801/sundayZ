@@ -2,17 +2,21 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChang
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
+import { DialogService } from 'primeng/dynamicdialog';
+import { errorInterceptor } from './interceptors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(),
+    provideHttpClient(
+      withInterceptors([errorInterceptor])
+    ),
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {
@@ -27,7 +31,8 @@ export const appConfig: ApplicationConfig = {
           }
         }
       }
-    })
+    }),
+    DialogService // PrimeNG DynamicDialog 服務
   ]
 };
 

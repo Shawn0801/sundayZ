@@ -1,28 +1,39 @@
-import { Directive, ElementRef, HostBinding, HostListener, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, Renderer2 } from '@angular/core';
 
 @Directive({
-  selector: '[appBasicHighlight]'
+  selector: '[appBasicHighlight]',
+  standalone: true
 })
 export class BasicHighlight {
+  @Input() highlightColor: string = '#FFABFF';
+  @Input() defaultColor: string = 'transparent';
 
   constructor(
     private elementRef: ElementRef,
-    private render: Renderer2
+    private renderer: Renderer2
   ) { }
 
   ngOnInit(): void {
-    this.elementRef.nativeElement.style.backgroundColor = '#12031dff';
+    this.renderer.setStyle(
+      this.elementRef.nativeElement,
+      'background-color',
+      this.defaultColor
+    );
   }
 
-  @HostBinding('style.backgroundColor') backgroundColor: string = '#CFCFCF';
-
-
-  @HostListener('mouseenter', ['$event']) mouseenter(eventData: Event) {
-    this.render.setStyle(this.elementRef.nativeElement, 'background-color', '#FFABFF');
-
+  @HostListener('mouseenter') onMouseEnter() {
+    this.renderer.setStyle(
+      this.elementRef.nativeElement,
+      'background-color',
+      this.highlightColor
+    );
   }
 
-  @HostListener('mouseleave', ['$event']) mouseleave(eventData: Event) {
-    this.render.setStyle(this.elementRef.nativeElement, 'background-color', 'transparent');
+  @HostListener('mouseleave') onMouseLeave() {
+    this.renderer.setStyle(
+      this.elementRef.nativeElement,
+      'background-color',
+      this.defaultColor
+    );
   }
 }

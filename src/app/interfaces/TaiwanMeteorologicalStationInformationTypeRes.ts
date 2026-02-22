@@ -1,10 +1,6 @@
-export interface PesticideType {
-  RS: string;
-  Data: PesticideType[];
-  Next: boolean;
-}
+import { MoaApiBaseResponse } from './MoaApiBaseResponse';
 
-export interface PesticideType {
+export interface TaiwanMeteorologicalStationInformation {
   Station_name: string;
   Station_ID: string;
   Station_Latitude: string;
@@ -14,3 +10,5 @@ export interface PesticideType {
   TOWN: string;
   TOWN_SN: string;
 }
+
+export interface TaiwanMeteorologicalStationInformationTypeRes extends MoaApiBaseResponse<TaiwanMeteorologicalStationInformation> {}

@@ -37,6 +37,9 @@ yarn-error.log
 testem.log
 /typings
 
+# Vite
+node_modules/.vite
+
 # System files
 .DS_Store
 Thumbs.db

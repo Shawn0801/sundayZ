@@ -1,8 +1,4 @@
-export interface PesticideType {
-  RS: string;
-  Data: Datum[];
-  Next: boolean;
-}
+import { MoaApiBaseResponse } from './MoaApiBaseResponse';
 
 export interface Datum {
   PesticideID: string;
@@ -11,6 +7,8 @@ export interface Datum {
   PesticideCoaID: string;
   PesticideProductName: string;
 }
+
+export interface PesticideType extends MoaApiBaseResponse<Datum> {}
 
 
 export interface WeatherType {
@@ -40,10 +38,6 @@ export interface WeatherType {
   TOWN_SN: string;
 }
 
-export interface WeatherInfo {
-  RS: string;
-  Data: WeatherType[];
-  Next: boolean;
-}
+export interface WeatherInfo extends MoaApiBaseResponse<WeatherType> {}
 
 export interface TextObject { text: string; }

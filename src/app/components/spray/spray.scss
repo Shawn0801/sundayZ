@@ -1,0 +1,69 @@
+// 水波動畫圓形儀表 — 符合農業風格專案設計
+.water-gauge {
+  width: 128px;
+  height: 128px;
+  position: relative;
+  border-radius: 50%;
+  // 背景色由 Angular 動態綁定（依土壤濕度狀態）
+  box-shadow:
+    inset 0 0 30px 0 rgba(0, 0, 0, 0.5),
+    0 4px 10px 0 rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.water-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  transition: height 0.8s ease-out;
+}
+
+// 水波動畫
+.water-wave {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  bottom: -100%; // 調整位置，讓波浪頂部對齊容器頂部
+  left: -50%;
+  border-radius: 43%;
+  animation: wave-rotate 5s linear infinite;
+  will-change: transform; // 優化動畫性能
+}
+
+.water-wave--front {
+  background: rgba(255, 255, 255, 0.7);
+  animation-duration: 5s;
+  z-index: 2;
+}
+
+.water-wave--back {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 40%;
+  animation-duration: 7s;
+  z-index: 1;
+}
+
+// 水波旋轉動畫
+@keyframes wave-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// 百分比數值標籤
+.water-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  pointer-events: none;
+}

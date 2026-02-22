@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { WeatherMain } from './components/weather-main/weather-main';
 import { Menu } from './components/menu/menu';
+import { MenuStateService } from './services/menu-state.service';
 
 @Component({
   selector: 'app-root',
@@ -16,4 +17,11 @@ import { Menu } from './components/menu/menu';
 })
 export class App {
   protected title = 'sundayZ';
+
+  private menuStateService = inject(MenuStateService);
+
+  // 根據選單狀態計算主要內容區的左邊距
+  mainMarginLeft = computed(() => {
+    return this.menuStateService.isCollapsed() ? '80px' : '256px';
+  });
 }

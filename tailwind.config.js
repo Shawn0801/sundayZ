@@ -7,8 +7,8 @@ module.exports = {
     extend: {
       colors: {
         // 農業風格配色系統
-        // 底色 (Base) - 暖胚白色 (棉麻質感)
-        base: {
+        // 底色 (Beige) - 暖胚白色 (棉麻質感) - 改名避免與 text-base 衝突
+        beige: {
           DEFAULT: '#FCFAF8',  // 主要底色
           50: '#FFFFFF',
           100: '#FCFAF8',      // 暖胚白
