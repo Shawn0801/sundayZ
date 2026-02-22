@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- 背景圓形 - 使用 primary 森林深綠色 -->
+  <rect width="32" height="32" rx="6" fill="#2D5A27"/>
+
+  <!-- 葉子圖示 - 白色 -->
+  <path d="M15 26.5A9 9 0 0 1 13.5 9.5C20 8.2 22 7.5 24.5 5c1.3 2.5 2.5 5.2 2.5 10 0 6.9-5.5 12.5-12 11.5Z"
+        fill="none"
+        stroke="white"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+  <path d="M6 27.5c0-3.8 2.3-6.7 6.3-7.5 2.8-.5 5.7-2.3 6.7-3.5"
+        fill="none"
+        stroke="white"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+</svg>
