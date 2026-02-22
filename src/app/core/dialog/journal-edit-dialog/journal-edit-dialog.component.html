@@ -1,0 +1,158 @@
+<div class="journal-edit-dialog">
+  <form [formGroup]="form" class="flex flex-col gap-4">
+
+    <!-- 操作類型 -->
+    <div class="field">
+      <label for="type" class="block text-sm font-semibold text-primary mb-2">
+        操作類型 <span class="text-danger-500">*</span>
+      </label>
+      <p-select
+        id="type"
+        formControlName="type"
+        [options]="typeOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="請選擇操作類型"
+        class="w-full"
+        [showClear]="false"
+      />
+      @if (form.get('type')?.invalid && form.get('type')?.touched) {
+        <small class="text-danger-500 text-xs mt-1 block">{{ getErrorMessage('type') }}</small>
+      }
+    </div>
+
+    <!-- 作物名稱 -->
+    <div class="field">
+      <label for="targetCrop" class="block text-sm font-semibold text-primary mb-2">
+        作物名稱 <span class="text-danger-500">*</span>
+      </label>
+      <input
+        pInputText
+        id="targetCrop"
+        formControlName="targetCrop"
+        placeholder="例如：青江菜、高麗菜"
+        class="w-full"
+      />
+      @if (form.get('targetCrop')?.invalid && form.get('targetCrop')?.touched) {
+        <small class="text-danger-500 text-xs mt-1 block">{{ getErrorMessage('targetCrop') }}</small>
+      }
+    </div>
+
+    <!-- 資材名稱（噴藥/施肥時顯示） -->
+    @if (showItemName) {
+      <div class="field">
+        <label for="itemName" class="block text-sm font-semibold text-primary mb-2">
+          資材名稱 @if (form.get('type')?.value === 'Pesticide' || form.get('type')?.value === 'Fertilizer') {
+            <span class="text-danger-500">*</span>
+          }
+        </label>
+        <input
+          pInputText
+          id="itemName"
+          formControlName="itemName"
+          placeholder="例如：益達胺、有機液肥"
+          class="w-full"
+        />
+        @if (form.get('itemName')?.invalid && form.get('itemName')?.touched) {
+          <small class="text-danger-500 text-xs mt-1 block">{{ getErrorMessage('itemName') }}</small>
+        }
+      </div>
+    }
+
+    <!-- 使用劑量（噴藥/施肥時顯示） -->
+    @if (showQuantity) {
+      <div class="field">
+        <label class="block text-sm font-semibold text-primary mb-2">使用劑量</label>
+        <div class="flex gap-2">
+          <p-inputnumber
+            formControlName="quantity"
+            placeholder="數量"
+            [min]="0"
+            [maxFractionDigits]="2"
+            class="flex-1"
+          />
+          <p-select
+            formControlName="unit"
+            [options]="unitOptions"
+            optionLabel="label"
+            optionValue="value"
+            class="w-32"
+          />
+        </div>
+      </div>
+    }
+
+    <!-- 安全採收期（僅噴藥時顯示） -->
+    @if (showPHI) {
+      <div class="field">
+        <label for="phi_days" class="block text-sm font-semibold text-primary mb-2">
+          安全採收期 (PHI) <span class="text-danger-500">*</span>
+        </label>
+        <p-inputnumber
+          id="phi_days"
+          formControlName="phi_days"
+          placeholder="輸入天數"
+          [min]="0"
+          suffix=" 天"
+          class="w-full"
+        />
+        @if (form.get('phi_days')?.invalid && form.get('phi_days')?.touched) {
+          <small class="text-danger-500 text-xs mt-1 block">{{ getErrorMessage('phi_days') }}</small>
+        }
+        @if (safeHarvestDate) {
+          <small class="text-success-600 text-xs mt-1 block">
+            <i class="pi pi-check-circle"></i>
+            預計可安全採收日期：{{ safeHarvestDate | date:'yyyy/MM/dd' }}
+          </small>
+        }
+      </div>
+    }
+
+    <!-- 作業時間 -->
+    <div class="field">
+      <label for="timestamp" class="block text-sm font-semibold text-primary mb-2">
+        作業時間 <span class="text-danger-500">*</span>
+      </label>
+      <p-datepicker
+        id="timestamp"
+        formControlName="timestamp"
+        [showTime]="true"
+        [showSeconds]="false"
+        dateFormat="yy/mm/dd"
+        hourFormat="24"
+        placeholder="選擇日期時間"
+        class="w-full"
+      />
+    </div>
+
+    <!-- 備註 -->
+    <div class="field">
+      <label for="notes" class="block text-sm font-semibold text-primary mb-2">備註</label>
+      <textarea
+        pTextarea
+        id="notes"
+        formControlName="notes"
+        rows="3"
+        placeholder="輸入備註資訊..."
+        class="w-full"
+      ></textarea>
+    </div>
+
+    <!-- 操作按鈕 -->
+    <div class="flex justify-end gap-3 pt-4 border-t border-surface-200">
+      <p-button
+        label="取消"
+        severity="secondary"
+        (onClick)="cancel()"
+        class="min-w-24"
+      />
+      <p-button
+        label="儲存"
+        severity="success"
+        (onClick)="save()"
+        class="min-w-24"
+      />
+    </div>
+
+  </form>
+</div>

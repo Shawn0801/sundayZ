@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { DialogService as PrimeDialogService } from 'primeng/dynamicdialog';
 import { ErrorDialogComponent, ErrorDialogData } from '../core/dialog/error-dialog/error-dialog.component';
 import { SuccessDialogComponent, SuccessDialogData } from '../core/dialog/success-dialog/success-dialog.component';
+import { JournalEditDialogComponent, JournalEditDialogData } from '../core/dialog/journal-edit-dialog/journal-edit-dialog.component';
 
 /**
  * 共用彈窗服務
@@ -134,5 +135,47 @@ export class DialogService {
     }
 
     return this.showError(message, '發生錯誤', errorCode);
+  }
+
+  /**
+   * 顯示農務日誌編輯彈窗
+   * @param data 彈窗資料（模式、預設類型、編輯資料）
+   * @returns DynamicDialogRef
+   *
+   * @example
+   * // 新增模式（從快速按鈕）
+   * const ref = this.dialogService.showJournalEdit({
+   *   mode: 'create',
+   *   presetType: JournalType.PESTICIDE
+   * });
+   *
+   * // 編輯模式
+   * const ref = this.dialogService.showJournalEdit({
+   *   mode: 'edit',
+   *   entry: existingEntry
+   * });
+   *
+   * // 監聽關閉事件
+   * ref.onClose.subscribe((result) => {
+   *   if (result) {
+   *     console.log('儲存的資料:', result);
+   *   }
+   * });
+   */
+  showJournalEdit(data?: JournalEditDialogData) {
+    return this.primeDialogService.open(JournalEditDialogComponent, {
+      data,
+      header: data?.mode === 'edit' ? '編輯農務紀錄' : '新增農務紀錄',
+      modal: true,
+      dismissableMask: false, // 防止誤觸關閉
+      closable: true,
+      styleClass: 'journal-edit-dialog-wrapper',
+      baseZIndex: 10000,
+      width: '600px',
+      breakpoints: {
+        '960px': '90vw',
+        '640px': '95vw'
+      }
+    });
   }
 }

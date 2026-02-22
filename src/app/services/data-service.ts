@@ -237,4 +237,93 @@ export class DataService {
     return Math.round(totalRainfall * 10) / 10; // 保留一位小數
   }
 
+  // ─────────────────────────────────────────
+  // 農務日誌儲存功能 (localStorage)
+  // ─────────────────────────────────────────
+
+  private readonly STORAGE_KEY = 'journal_entries';
+
+  /**
+   * 儲存農務日誌（使用 localStorage 暫存）
+   * @param entry 日誌條目
+   * @returns 儲存成功與否
+   *
+   * TODO: 未來可改為 Firebase Firestore 或後端 API
+   */
+  saveJournalEntry(entry: JournalEntry): boolean {
+    try {
+      // 從 localStorage 讀取現有資料
+      const existingData = localStorage.getItem(this.STORAGE_KEY);
+      const entries: JournalEntry[] = existingData ? JSON.parse(existingData) : [];
+
+      // 檢查是否為更新（ID 已存在）
+      const existingIndex = entries.findIndex(e => e.id === entry.id);
+
+      if (existingIndex !== -1) {
+        // 更新現有紀錄
+        entries[existingIndex] = entry;
+        console.log('更新日誌:', entry.id);
+      } else {
+        // 新增紀錄
+        entries.push(entry);
+        console.log('新增日誌:', entry.id);
+      }
+
+      // 儲存回 localStorage
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(entries));
+
+      return true;
+    } catch (error) {
+      console.error('儲存日誌失敗:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 從 localStorage 載入所有日誌
+   * @returns JournalEntry 陣列
+   */
+  loadJournalEntries(): JournalEntry[] {
+    try {
+      const data = localStorage.getItem(this.STORAGE_KEY);
+
+      if (data) {
+        const entries: JournalEntry[] = JSON.parse(data);
+        // 將日期字串轉換回 Date 物件
+        return entries.map(entry => ({
+          ...entry,
+          timestamp: new Date(entry.timestamp),
+          phi_end_date: entry.phi_end_date ? new Date(entry.phi_end_date) : undefined
+        }));
+      }
+
+      return [];
+    } catch (error) {
+      console.error('載入日誌失敗:', error);
+      return [];
+    }
+  }
+
+  /**
+   * 刪除日誌
+   * @param id 日誌 ID
+   * @returns 刪除成功與否
+   */
+  deleteJournalEntry(id: string): boolean {
+    try {
+      const existingData = localStorage.getItem(this.STORAGE_KEY);
+      const entries: JournalEntry[] = existingData ? JSON.parse(existingData) : [];
+
+      const filteredEntries = entries.filter(e => e.id !== id);
+
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredEntries));
+
+      console.log('刪除日誌:', id);
+      return true;
+    } catch (error) {
+      console.error('刪除日誌失敗:', error);
+      return false;
+    }
+  }
+
 }

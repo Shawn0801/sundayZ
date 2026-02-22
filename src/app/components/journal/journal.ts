@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DatePicker } from 'primeng/datepicker';
 import { DataService } from '../../services/data-service';
+import { DialogService } from '../../services/dialog.service';
 import {
   JournalEntry,
   JournalType,
@@ -20,6 +21,7 @@ import {
 })
 export class Journal implements OnInit {
   private dataService = inject(DataService);
+  private dialogService = inject(DialogService);
 
   // 日曆選擇的日期
   selectedDate: Date = new Date();
@@ -33,7 +35,15 @@ export class Journal implements OnInit {
   JournalTypeColors = JournalTypeColors;
 
   ngOnInit(): void {
-    this.allEntries = this.dataService.getMockJournalEntries();
+    // 先載入 localStorage 儲存的資料
+    const savedEntries = this.dataService.loadJournalEntries();
+
+    // 如果有儲存的資料就使用，否則使用 Mock 資料
+    if (savedEntries.length > 0) {
+      this.allEntries = savedEntries;
+    } else {
+      this.allEntries = this.dataService.getMockJournalEntries();
+    }
   }
 
   /**
@@ -142,6 +152,42 @@ export class Journal implements OnInit {
 
   private onQuickAction(type: JournalType): void {
     console.log(`快速紀錄：${JournalTypeLabels[type]}`);
-    alert(`即將開啟「${JournalTypeLabels[type]}」紀錄頁面（功能開發中）`);
+
+    // 開啟編輯彈窗
+    const ref = this.dialogService.showJournalEdit({
+      mode: 'create',
+      presetType: type
+    });
+
+    // 監聽彈窗關閉事件
+    ref.onClose.subscribe((result: Partial<JournalEntry> | undefined) => {
+      if (result) {
+        console.log('新增的日誌資料:', result);
+
+        // 儲存到本地資料
+        const newEntry: JournalEntry = {
+          ...result,
+          id: result.id || `j${Date.now()}`,
+          userId: result.userId || 'user001',
+          type: result.type!,
+          targetCrop: result.targetCrop!,
+          timestamp: result.timestamp!
+        };
+
+        this.allEntries = [newEntry, ...this.allEntries];
+
+        // 儲存到 DataService
+        this.dataService.saveJournalEntry(newEntry);
+
+        // 如果新增的是今天的紀錄，自動切換到今天
+        const today = new Date();
+        const entryDate = new Date(newEntry.timestamp);
+        if (this.formatDateString(today) === this.formatDateString(entryDate)) {
+          this.selectedDate = today;
+        } else {
+          this.selectedDate = entryDate;
+        }
+      }
+    });
   }
 }
