@@ -112,7 +112,7 @@ export class TaiwanMap implements OnInit, AfterViewInit, OnDestroy {
       this.svg = null;
     }
 
-    this.http.get<TopoJsonData>('/COUNTY_MOI_1140318.json').subscribe({
+    this.http.get<TopoJsonData>('COUNTY_MOI_1140318.json').subscribe({
       next: (data) => {
         this.initMap(data);
       },
