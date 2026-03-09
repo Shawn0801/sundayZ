@@ -5,6 +5,7 @@ import { AgriProductsTransTypeRes } from '../interfaces/AgriProductsTransTypeRes
 import { AutoWeatherStation, AutoWeatherStationRes } from '../interfaces/AutoWeatherStationRes';
 import { PlantEpidemicTypeRes } from '../interfaces/PlantEpidemicTypeRes';
 import { JournalEntry, JournalType } from '../interfaces/JournalEntry';
+import { API_CONFIG } from '../config/api.config';
 
 @Injectable({
   providedIn: 'root'
@@ -15,17 +16,17 @@ export class DataService {
 
 
   getData() {
-    const url = 'https://data.moa.gov.Ｏtw/api/v1/PesticideType/';
+    const url = `${API_CONFIG.moa}/PesticideType/`;
     return this.http.get<PesticideType>(url);
   }
 
   getWeather() {
-    const url = 'https://data.moa.gov.tw/api/v1/AutoWeatherStationType/';
+    const url = `${API_CONFIG.moa}/AutoWeatherStationType/`;
     return this.http.get<WeatherInfo>(url);
   }
 
   postData() {
-    const url = '/api/front/statistics/export';
+    const url = `${API_CONFIG.dataGov}/front/statistics/export`;
     const postData = { format: 'json', type: 'category' };
     return this.http.post<any[]>(url, postData);
   }
@@ -33,7 +34,7 @@ export class DataService {
 
 
   getAgriProductsTransType() {
-    const url = '/moa-api/AgriProductsTransType/';
+    const url = `${API_CONFIG.moa}/AgriProductsTransType/`;
     return this.http.get<AgriProductsTransTypeRes>(url);
   }
 
@@ -45,7 +46,7 @@ export class DataService {
    * @returns Observable<AgriProductsTransTypeRes>
    */
   getAgriProductsByDateRange(startDate: string, endDate: string, cropCode?: string) {
-    let url = `/moa-api/AgriProductsTransType/?Start_time=${startDate}&End_time=${endDate}`;
+    let url = `${API_CONFIG.moa}/AgriProductsTransType/?Start_time=${startDate}&End_time=${endDate}`;
     if (cropCode) {
       url += `&CropCode=${cropCode}`;
     }
@@ -140,7 +141,7 @@ export class DataService {
   // ex https://data.moa.gov.tw/api/v1/PlantEpidemicType/?Year=2026
   getPlantEpidemicType() {
     const today = new Date();
-    let url = `/moa-api/PlantEpidemicType/?Year=${today.getFullYear()}`;
+    let url = `${API_CONFIG.moa}/PlantEpidemicType/?Year=${today.getFullYear()}`;
     return this.http.get<PlantEpidemicTypeRes>(url);
   }
 
