@@ -8,6 +8,9 @@ import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { DialogService } from 'primeng/dynamicdialog';
 import { errorInterceptor } from './interceptors/error.interceptor';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getAuth, provideAuth } from '@angular/fire/auth';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -32,7 +35,9 @@ export const appConfig: ApplicationConfig = {
         }
       }
     }),
-    DialogService // PrimeNG DynamicDialog 服務
+    DialogService, // PrimeNG DynamicDialog 服務
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideAuth(() => getAuth())
   ]
 };
 

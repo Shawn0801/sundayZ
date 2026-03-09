@@ -1,22 +1,23 @@
-<aside [class]="isCollapsed() ? 'w-20' : 'w-64'" class="h-screen bg-white fixed left-0 top-0 z-50 border-r border-beige-200 flex flex-col shadow-lg transition-all duration-300">
+<aside [class]="isCollapsed() ? 'w-20' : 'w-64'"
+  class="h-screen bg-white fixed left-0 top-0 z-50 border-r border-beige-200 flex flex-col shadow-lg transition-all duration-300">
   <!-- Logo 區塊 -->
   <div class="flex items-center p-6 border-b border-beige-200 relative">
-    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center cursor-pointer transition-colors hover:bg-primary-600"
-         [class.mr-3]="!isCollapsed()">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-white">
-        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
-        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+    <div
+      class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center cursor-pointer transition-colors hover:bg-primary-600"
+      [class.mr-3]="!isCollapsed()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-white">
+        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
       </svg>
     </div>
     @if (!isCollapsed()) {
-      <span class="text-xl font-bold text-primary cursor-pointer">田間助理</span>
+    <span class="text-xl font-bold text-primary cursor-pointer">田間助理</span>
     }
 
     <!-- 收合按鈕 -->
-    <button
-      (click)="toggleMenu()"
-      class="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-primary rounded-full flex items-center justify-center cursor-pointer transition-all hover:bg-primary-600 shadow-md"
-    >
+    <button (click)="toggleMenu()"
+      class="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-primary rounded-full flex items-center justify-center cursor-pointer transition-all hover:bg-primary-600 shadow-md">
       <i [class]="isCollapsed() ? 'pi pi-angle-right' : 'pi pi-angle-left'" class="text-white text-xs"></i>
     </button>
   </div>
@@ -25,65 +26,62 @@
   <nav class="flex-1 overflow-y-auto py-4 px-3">
     <ul class="list-none m-0 p-0">
       @for (item of items(); track item.routerLink) {
-        <li class="mb-1">
-          <a
-            [routerLink]="item.routerLink"
-            routerLinkActive="active-menu-item"
-            [title]="isCollapsed() ? item.label : ''"
-            class="menu-item flex items-center px-4 py-3 text-text no-underline rounded-lg transition-all cursor-pointer border-l-4 border-transparent"
-          >
-            <i [class]="item.icon" class="menu-icon text-xl text-secondary transition-all"
-               [class.mr-3]="!isCollapsed()"></i>
-            @if (!isCollapsed()) {
-              <span class="text-sm font-medium whitespace-nowrap">{{ item.label }}</span>
-            }
-          </a>
-        </li>
+      <li class="mb-1">
+        <a [routerLink]="item.routerLink" routerLinkActive="active-menu-item" [title]="isCollapsed() ? item.label : ''"
+          class="menu-item flex items-center px-4 py-3 text-text no-underline rounded-lg transition-all cursor-pointer border-l-4 border-transparent">
+          <i [class]="item.icon" class="menu-icon text-xl text-secondary transition-all"
+            [class.mr-3]="!isCollapsed()"></i>
+          @if (!isCollapsed()) {
+          <span class="text-sm font-medium whitespace-nowrap">{{ item.label }}</span>
+          }
+        </a>
+      </li>
       }
     </ul>
   </nav>
 
   <!-- 使用者區塊 -->
   <div class="p-6 border-t border-beige-200">
-    <div class="user-profile flex items-center p-3 rounded-lg bg-secondary/10 cursor-pointer transition-colors"
-         [class.justify-center]="isCollapsed()">
-      <div class="w-10 h-10 rounded-full bg-secondary/20 border border-secondary/30 flex items-center justify-center"
-           [class.mr-3]="!isCollapsed()">
+    @if (currentUser$ | async; as user) {
+    <div class="user-profile flex items-center p-3 rounded-lg bg-secondary/10 mb-3"
+      [class.justify-center]="isCollapsed()">
+      <div class="w-10 h-10 rounded-full bg-secondary/20 border border-secondary/30 flex items-center justify-center overflow-hidden"
+        [class.mr-3]="!isCollapsed()">
+        @if (user.photoURL) {
+        <img [src]="user.photoURL" [alt]="user.displayName || 'User'" class="w-full h-full object-cover">
+        } @else {
         <i class="pi pi-user text-primary"></i>
+        }
       </div>
       @if (!isCollapsed()) {
-        <div class="flex-1">
-          <p class="m-0 text-sm font-medium text-text">使用者</p>
-          <p class="m-0 text-xs text-surface-500">查看個人資料</p>
-        </div>
+      <div class="flex-1 overflow-hidden">
+        <p class="m-0 text-sm font-medium text-text truncate">{{ user.displayName || '使用者' }}</p>
+        <p class="m-0 text-xs text-surface-500 truncate">{{ user.email }}</p>
+      </div>
       }
     </div>
+
+    <!-- 登出按鈕 -->
+    <button (click)="logout()"
+      class="w-full flex items-center justify-center px-4 py-2 rounded-lg bg-danger-500 hover:bg-danger-600 text-white transition-colors cursor-pointer border-none"
+      [class.px-2]="isCollapsed()"
+      [title]="isCollapsed() ? '登出' : ''">
+      <i class="pi pi-sign-out" [class.mr-2]="!isCollapsed()"></i>
+      @if (!isCollapsed()) {
+      <span class="text-sm font-medium">登出</span>
+      }
+    </button>
+    } @else {
+    <!-- 未登入狀態 -->
+    <a [routerLink]="'/login'"
+      class="w-full flex items-center justify-center px-4 py-2 rounded-lg bg-primary hover:bg-primary-600 text-white transition-colors cursor-pointer no-underline"
+      [class.px-2]="isCollapsed()"
+      [title]="isCollapsed() ? '登入' : ''">
+      <i class="pi pi-sign-in" [class.mr-2]="!isCollapsed()"></i>
+      @if (!isCollapsed()) {
+      <span class="text-sm font-medium">登入</span>
+      }
+    </a>
+    }
   </div>
 </aside>
-
-<style>
-  /* Hover 效果 */
-  .menu-item:hover {
-    background: #F3F5F0 !important;
-    color: #2D5A27 !important;
-  }
-
-  .menu-item:hover .menu-icon {
-    color: #2D5A27 !important;
-  }
-
-  .active-menu-item {
-    background: #E8F2E6 !important;
-    color: #1B3617 !important;
-    border-left-color: #2D5A27 !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-  }
-
-  .active-menu-item .menu-icon {
-    color: #2D5A27 !important;
-  }
-
-  .user-profile:hover {
-    background: rgba(139, 157, 119, 0.2) !important;
-  }
-</style>

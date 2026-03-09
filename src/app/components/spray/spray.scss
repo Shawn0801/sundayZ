@@ -23,25 +23,26 @@
 // 水波動畫
 .water-wave {
   position: absolute;
-  width: 200%;
-  height: 200%;
-  bottom: -100%; // 調整位置，讓波浪頂部對齊容器頂部
-  left: -50%;
-  border-radius: 43%;
-  animation: wave-rotate 5s linear infinite;
+  width: 160%; // 調整寬度，讓波浪能覆蓋圓形寬度
+  height: 160%; // 設定為與寬度一致，形成圓形波浪
+  bottom: -80%; // 大幅下移，讓波浪的圓弧貼合容器底部
+  left: -30%; // 水平居中
+  border-radius: 40%; // 從 45% 改為 40%，讓波浪更明顯、更胖
+  animation: wave-rotate 12s linear infinite;
   will-change: transform; // 優化動畫性能
 }
 
 .water-wave--front {
   background: rgba(255, 255, 255, 0.7);
-  animation-duration: 5s;
+  animation-duration: 12s;
+  border-radius: 40%; // 前層波浪，圓潤的波峰波谷
   z-index: 2;
 }
 
 .water-wave--back {
   background: rgba(255, 255, 255, 0.3);
-  border-radius: 40%;
-  animation-duration: 7s;
+  border-radius: 38%; // 從 44% 改為 38%，後層波浪更明顯，產生層次感
+  animation-duration: 15s;
   z-index: 1;
 }
 

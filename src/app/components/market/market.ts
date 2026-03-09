@@ -1,5 +1,7 @@
 import { Component, inject, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Select } from 'primeng/select';
 import { DataService } from '../../services/data-service';
 import { AgriProduct } from '../../interfaces/AgriProductsTransTypeRes';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
@@ -9,10 +11,20 @@ Chart.register(...registerables);
 
 type ChartPeriod = 'today' | 'week' | 'month';
 
+interface CropOption {
+  CropCode: string;
+  CropName: string;
+}
+
+interface MarketOption {
+  MarketCode: string;
+  MarketName: string;
+}
+
 @Component({
   selector: 'app-market',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, Select],
   templateUrl: './market.html',
   styleUrl: './market.scss'
 })
@@ -26,6 +38,16 @@ export class Market implements OnInit, AfterViewInit, OnDestroy {
   loading = true;
   error: string | null = null;
   selectedPeriod: ChartPeriod = 'today';
+
+  // 作物選單相關
+  allCrops: CropOption[] = [];
+  selectedCropCode: string | null = null;
+  allResponseData: AgriProduct[] = [];
+
+  // 市場選單相關
+  availableMarkets: MarketOption[] = [];
+  selectedMarketCode: string | null = null;
+  ALL_MARKETS_CODE = 'ALL'; // 特殊值：代表所有市場
 
   // 資料
   currentCrop: AgriProduct | null = null;
@@ -60,7 +82,6 @@ export class Market implements OnInit, AfterViewInit, OnDestroy {
     this.loading = true;
     this.error = null;
 
-    // 先嘗試不帶日期參數的基本查詢（取得最新資料）
     console.log('嘗試取得最新農產品資料...');
 
     this.dataService.getAgriProductsTransType().subscribe({
@@ -69,55 +90,34 @@ export class Market implements OnInit, AfterViewInit, OnDestroy {
         console.log('資料筆數:', response.Data?.length || 0);
 
         if (response.Data && response.Data.length > 0) {
-          // 使用第一筆作物資料
-          this.currentCrop = response.Data[0];
-          const cropCode = this.currentCrop.CropCode;
+          // 儲存所有資料
+          this.allResponseData = response.Data;
 
-          console.log('選擇作物:', this.currentCrop.CropName, '代碼:', cropCode);
+          // 提取所有不重複的作物
+          const cropMap = new Map<string, CropOption>();
+          response.Data.forEach(item => {
+            if (!cropMap.has(item.CropCode)) {
+              cropMap.set(item.CropCode, {
+                CropCode: item.CropCode,
+                CropName: item.CropName
+              });
+            }
+          });
+          this.allCrops = Array.from(cropMap.values());
 
-          // 篩選該作物的所有資料
-          const allCropData = response.Data.filter(item => item.CropCode === cropCode);
+          console.log('可用作物數量:', this.allCrops.length);
+          console.log('作物列表:', this.allCrops.map(c => c.CropName).join(', '));
 
-          console.log('該作物總資料筆數:', allCropData.length);
-
-          // 取得所有可用的日期並排序
-          const allDates = [...new Set(allCropData.map(item => item.TransDate))].sort();
-          console.log('可用的交易日期:', allDates);
-
-          // 找出最新的交易日期
-          const latestDate = allDates[allDates.length - 1];
-          console.log('最新交易日期:', latestDate);
-
-          // 使用最新日期的資料作為「今日」資料
-          this.todayData = allCropData.filter(item => item.TransDate === latestDate);
-          this.currentCrop = this.todayData[0];
-
-          // 限制月資料為最近 30 天
-          const monthDate = new Date();
-          monthDate.setDate(monthDate.getDate() - 30);
-          const monthCropData = allCropData.filter(item =>
-            new Date(item.TransDate) >= monthDate
-          );
-          this.monthData = this.processDataByDate(monthCropData);
-
-          // 取得最近 7 天的資料
-          const weekDate = new Date();
-          weekDate.setDate(weekDate.getDate() - 7);
-          const weekCropData = allCropData.filter(item =>
-            new Date(item.TransDate) >= weekDate
-          );
-          this.weekData = this.processDataByDate(weekCropData);
+          // 預設選擇第一個作物
+          if (this.allCrops.length > 0) {
+            this.selectedCropCode = this.allCrops[0].CropCode;
+            // 更新可用市場列表
+            this.updateAvailableMarkets(this.selectedCropCode);
+            // 更新圖表資料（使用預設的「所有市場」）
+            this.updateChartData(this.selectedCropCode, this.ALL_MARKETS_CODE);
+          }
 
           this.loading = false;
-
-          console.log('資料統計:', {
-            今日資料筆數: this.todayData.length,
-            一週資料筆數: this.weekData.length,
-            一月資料筆數: this.monthData.length
-          });
-
-          // 資料載入完成後創建圖表
-          setTimeout(() => this.createChart(), 100);
         } else {
           console.error('API 回應無資料');
           const dayOfWeek = new Date().getDay();
@@ -173,6 +173,129 @@ export class Market implements OnInit, AfterViewInit, OnDestroy {
   private average(numbers: number[]): number {
     if (numbers.length === 0) return 0;
     return Math.round(numbers.reduce((sum, n) => sum + n, 0) / numbers.length * 100) / 100;
+  }
+
+  /**
+   * 更新可用市場列表（根據選擇的作物）
+   */
+  updateAvailableMarkets(cropCode: string): void {
+    console.log('更新可用市場列表，作物代碼:', cropCode);
+
+    // 篩選該作物的所有資料
+    const allCropData = this.allResponseData.filter(item => item.CropCode === cropCode);
+
+    if (allCropData.length === 0) {
+      this.availableMarkets = [];
+      return;
+    }
+
+    // 提取該作物的所有不重複市場
+    const marketMap = new Map<string, MarketOption>();
+    allCropData.forEach(item => {
+      if (!marketMap.has(item.MarketCode)) {
+        marketMap.set(item.MarketCode, {
+          MarketCode: item.MarketCode,
+          MarketName: item.MarketName
+        });
+      }
+    });
+
+    // 加入「所有市場」選項
+    this.availableMarkets = [
+      { MarketCode: this.ALL_MARKETS_CODE, MarketName: '所有市場（平均）' },
+      ...Array.from(marketMap.values())
+    ];
+
+    console.log('可用市場數量:', this.availableMarkets.length - 1); // 扣除「所有市場」
+    console.log('市場列表:', this.availableMarkets.map(m => m.MarketName).join(', '));
+
+    // 預設選擇「所有市場」
+    this.selectedMarketCode = this.ALL_MARKETS_CODE;
+  }
+
+  /**
+   * 更新圖表資料（根據選擇的作物和市場）
+   */
+  updateChartData(cropCode: string, marketCode: string): void {
+    console.log('更新圖表資料，作物代碼:', cropCode, '市場代碼:', marketCode);
+
+    // 篩選該作物的所有資料
+    let allCropData = this.allResponseData.filter(item => item.CropCode === cropCode);
+
+    // 如果選擇特定市場，進一步篩選
+    if (marketCode !== this.ALL_MARKETS_CODE) {
+      allCropData = allCropData.filter(item => item.MarketCode === marketCode);
+      console.log('篩選後的市場資料筆數:', allCropData.length);
+    } else {
+      console.log('顯示所有市場資料，筆數:', allCropData.length);
+    }
+
+    if (allCropData.length === 0) {
+      console.error('找不到該作物的資料');
+      return;
+    }
+
+    // 取得所有可用的日期並排序
+    const allDates = [...new Set(allCropData.map(item => item.TransDate))].sort();
+    console.log('可用的交易日期:', allDates);
+
+    // 找出最新的交易日期
+    const latestDate = allDates[allDates.length - 1];
+    console.log('最新交易日期:', latestDate);
+
+    // 使用最新日期的資料作為「今日」資料
+    this.todayData = allCropData.filter(item => item.TransDate === latestDate);
+    this.currentCrop = this.todayData[0];
+
+    // 限制月資料為最近 30 天
+    const monthDate = new Date();
+    monthDate.setDate(monthDate.getDate() - 30);
+    const monthCropData = allCropData.filter(item =>
+      new Date(item.TransDate) >= monthDate
+    );
+    this.monthData = this.processDataByDate(monthCropData);
+
+    // 取得最近 7 天的資料
+    const weekDate = new Date();
+    weekDate.setDate(weekDate.getDate() - 7);
+    const weekCropData = allCropData.filter(item =>
+      new Date(item.TransDate) >= weekDate
+    );
+    this.weekData = this.processDataByDate(weekCropData);
+
+    console.log('資料統計:', {
+      今日資料筆數: this.todayData.length,
+      一週資料筆數: this.weekData.length,
+      一月資料筆數: this.monthData.length
+    });
+
+    // 重新繪製圖表
+    setTimeout(() => this.createChart(), 100);
+  }
+
+  /**
+   * 作物選單變更事件
+   */
+  onCropChange(cropCode: string): void {
+    console.log('使用者選擇作物:', cropCode);
+
+    // 更新可用市場列表
+    this.updateAvailableMarkets(cropCode);
+
+    // 更新圖表資料（使用預設的「所有市場」）
+    this.updateChartData(cropCode, this.selectedMarketCode!);
+  }
+
+  /**
+   * 市場選單變更事件
+   */
+  onMarketChange(marketCode: string): void {
+    console.log('使用者選擇市場:', marketCode);
+
+    // 更新圖表資料
+    if (this.selectedCropCode) {
+      this.updateChartData(this.selectedCropCode, marketCode);
+    }
   }
 
   /**

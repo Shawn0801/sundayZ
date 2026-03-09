@@ -1,7 +1,10 @@
+import { registerables } from 'chart.js';
 import { Journal } from './components/journal/journal';
 import { Routes } from '@angular/router';
 import { Dashboard } from './components/dashboard/dashboard';
 import { Market } from './components/market/market';
+import { Login } from './components/auth/login/login';
+import { Register } from './components/auth/register/register';
 
 export const routes: Routes = [
   // 預設路由：導向 Dashboard
@@ -21,6 +24,16 @@ export const routes: Routes = [
     path: 'journal',
     component: Journal,
     title: '田間日誌'
+  },
+  {
+    path: 'login',
+    component: Login,
+    title: '登入'
+  },
+  {
+    path: 'register',
+    component: Register,
+    title: '註冊'
   },
   // 404 路由
   { path: '**', redirectTo: '/dashboard' }

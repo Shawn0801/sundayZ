@@ -1,17 +1,19 @@
 import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Marquee } from '../marquee/marquee';
-import { WeatherMain } from '../weather-main/weather-main';
 import { Market } from '../market/market';
 import { Spray } from '../spray/spray';
 import { Journal } from '../journal/journal';
 import { DialogService } from '../../services/dialog.service';
+import { TaiwanMap } from '../taiwan-map/taiwan-map';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
+    RouterLink,
     Marquee,
-    WeatherMain,
+    TaiwanMap,
     Market,
     Spray,
     Journal

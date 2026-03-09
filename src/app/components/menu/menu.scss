@@ -1,0 +1,48 @@
+.menu-item:hover {
+    background: #F3F5F0 !important;
+    color: #2D5A27 !important;
+  }
+
+  .menu-item:hover .menu-icon {
+    color: #2D5A27 !important;
+  }
+
+  .active-menu-item {
+    background: #E8F2E6 !important;
+    color: #1B3617 !important;
+    border-left-color: #2D5A27 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .active-menu-item .menu-icon {
+    color: #2D5A27 !important;
+  }
+
+  .user-profile {
+    transition: background-color 0.2s ease;
+  }
+
+  // 登出按鈕樣式
+  button {
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s ease;
+
+    &:focus {
+      @apply outline-2 outline-danger-500/50 outline-offset-2;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  // 登入按鈕樣式
+  a[routerLink='/login'] {
+    display: block;
+    transition: all 0.2s ease;
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }

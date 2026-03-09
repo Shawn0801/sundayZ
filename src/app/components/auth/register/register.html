@@ -1,0 +1,106 @@
+<div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10">
+  <div class="w-full max-w-md px-4">
+    <p-card styleClass="shadow-2xl">
+      <ng-template pTemplate="header">
+        <div class="text-center py-6 px-4">
+          <div class="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-white">
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-primary m-0">田間助理</h2>
+          <p class="text-surface-500 mt-2 mb-0">建立新帳號</p>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="content">
+        @if (errorMessage) {
+        <p-message severity="error" [text]="errorMessage" styleClass="w-full mb-4"></p-message>
+        }
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-4">
+          <div class="flex flex-col gap-2">
+            <label for="displayName" class="font-semibold text-sm">姓名</label>
+            <input pInputText id="displayName" formControlName="displayName" placeholder="請輸入您的姓名" class="w-full"
+              [class.ng-invalid]="displayName?.invalid && displayName?.touched" />
+            @if (displayName?.invalid && displayName?.touched) {
+            <small class="text-danger-500">
+              @if (displayName?.errors?.['required']) {
+              請輸入姓名
+              } @else if (displayName?.errors?.['minlength']) {
+              姓名至少需要 2 個字元
+              }
+            </small>
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="email" class="font-semibold text-sm">電子郵件</label>
+            <input pInputText id="email" formControlName="email" type="email" placeholder="your@email.com"
+              class="w-full" [class.ng-invalid]="email?.invalid && email?.touched" />
+            @if (email?.invalid && email?.touched) {
+            <small class="text-danger-500">
+              @if (email?.errors?.['required']) {
+              請輸入電子郵件
+              } @else if (email?.errors?.['email']) {
+              請輸入有效的電子郵件
+              }
+            </small>
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="password" class="font-semibold text-sm">密碼</label>
+            <p-password id="password" formControlName="password" placeholder="至少 6 個字元" [toggleMask]="true"
+              styleClass="w-full" [inputStyleClass]="'w-full'"
+              [class.ng-invalid]="password?.invalid && password?.touched"></p-password>
+            @if (password?.invalid && password?.touched) {
+            <small class="text-danger-500">
+              @if (password?.errors?.['required']) {
+              請輸入密碼
+              } @else if (password?.errors?.['minlength']) {
+              密碼至少需要 6 個字元
+              }
+            </small>
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="confirmPassword" class="font-semibold text-sm">確認密碼</label>
+            <p-password id="confirmPassword" formControlName="confirmPassword" placeholder="再次輸入密碼"
+              [toggleMask]="true" [feedback]="false" styleClass="w-full" [inputStyleClass]="'w-full'"
+              [class.ng-invalid]="confirmPassword?.invalid && confirmPassword?.touched"></p-password>
+            @if (confirmPassword?.invalid && confirmPassword?.touched) {
+            <small class="text-danger-500">
+              @if (confirmPassword?.errors?.['required']) {
+              請確認密碼
+              }
+            </small>
+            }
+            @if (registerForm.errors?.['passwordMismatch'] && confirmPassword?.touched) {
+            <small class="text-danger-500">密碼不一致</small>
+            }
+          </div>
+
+          <p-button type="submit" label="註冊" icon="pi pi-user-plus" [loading]="loading"
+            styleClass="w-full justify-center" [disabled]="registerForm.invalid || loading"></p-button>
+        </form>
+
+        <p-divider align="center">
+          <span class="text-surface-500 text-sm">或</span>
+        </p-divider>
+
+        <p-button (onClick)="registerWithGoogle()" label="使用 Google 註冊" icon="pi pi-google" [loading]="loading"
+          severity="secondary" [outlined]="true" styleClass="w-full justify-center"
+          [disabled]="loading"></p-button>
+
+        <div class="text-center mt-4">
+          <span class="text-surface-600 text-sm">已經有帳號了？</span>
+          <a routerLink="/login" class="text-primary font-semibold text-sm ml-2 hover:underline">立即登入</a>
+        </div>
+      </ng-template>
+    </p-card>
+  </div>
+</div>

@@ -1,6 +1,11 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef, Output, EventEmitter, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef, Output, EventEmitter, PLATFORM_ID, Inject, inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { DialogService } from '../../services/dialog.service';
+import { DataService } from '../../services/data-service';
+import { CountyWeatherData } from '../../interfaces/CountyWeatherData';
+import { AutoWeatherStation } from '../../interfaces/AutoWeatherStationRes';
+import { WeatherType } from '../../interfaces/PesticideTypeRes';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 
@@ -28,7 +33,6 @@ export class TaiwanMap implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
   @Output() countySelected = new EventEmitter<TaiwanCounty>();
 
-  selectedCounty: TaiwanCounty | null = null;
   isMapReady = false;
   isLoading = true;
   private isInitialized = false;
@@ -37,6 +41,11 @@ export class TaiwanMap implements OnInit, AfterViewInit, OnDestroy {
   private projection: any;
   private path: any;
   private zoom: any;
+  private dialogService = inject(DialogService);
+  private dataService = inject(DataService);
+
+  // 縣市天氣資料 Map (key: 縣市名稱, value: CountyWeatherData)
+  private countyWeatherMap: Map<string, CountyWeatherData> = new Map();
 
   counties: TaiwanCounty[] = [
     { id: '臺北市', name: '台北市', population: '約260萬人', description: '首都，政治經濟中心' },
@@ -69,7 +78,8 @@ export class TaiwanMap implements OnInit, AfterViewInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    // Component initialization
+    // 載入氣象資料
+    this.loadWeatherData();
   }
 
   ngAfterViewInit(): void {
@@ -178,9 +188,10 @@ export class TaiwanMap implements OnInit, AfterViewInit, OnDestroy {
         const countyName = d.properties.COUNTYNAME;
         return this.getCountyColor(countyName);
       })
-      .attr('stroke', '#2c3e50')
-      .attr('stroke-width', 0.8)
+      .attr('stroke', '#2D5A27') // primary-500 森林深綠
+      .attr('stroke-width', 1)
       .style('cursor', 'pointer')
+      .style('filter', 'drop-shadow(0 1px 2px rgba(45, 90, 39, 0.1))')
       .on('mouseover', (event: any, d: any) => {
         this.onCountyHover(event, d);
       })
@@ -194,7 +205,7 @@ export class TaiwanMap implements OnInit, AfterViewInit, OnDestroy {
         this.onCountyClick(d);
       });
 
-    // Add county labels
+    // Add county labels - 農業風格字體
     this.g.selectAll('text')
       .data(geojson.features)
       .enter()
@@ -204,10 +215,10 @@ export class TaiwanMap implements OnInit, AfterViewInit, OnDestroy {
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
       .attr('class', 'county-label')
-      .style('font-family', 'Arial, sans-serif')
-      .style('font-size', '8px')
-      .style('font-weight', 'bold')
-      .style('fill', '#2c3e50')
+      .style('font-family', 'Microsoft JhengHei, Noto Sans TC, Arial, sans-serif')
+      .style('font-size', '9px')
+      .style('font-weight', '600')
+      .style('fill', '#353935') // text-500 石墨深灰
       .style('pointer-events', 'none')
       .text((d: any) => d.properties.COUNTYNAME.replace('臺', '台'));
 
@@ -218,39 +229,53 @@ export class TaiwanMap implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = false;
   }
 
+  /**
+   * 取得縣市顏色 - 使用農業 IoT 配色系統
+   * 直轄市使用森林深綠 (Primary)
+   * 縣市使用鼠尾草綠 (Secondary)
+   */
   private getCountyColor(countyName: string): string {
-    // Special colors for major cities
+    // 直轄市：森林深綠漸層
     const majorCities = ['臺北市', '新北市', '桃園市', '臺中市', '臺南市', '高雄市'];
     if (majorCities.includes(countyName)) {
-      return '#3498db';
+      return '#479737'; // primary-400 (較亮的綠色)
     }
-    return '#52c41a';
+    // 縣：鼠尾草綠
+    return '#8B9D77'; // secondary-500
   }
 
+  /**
+   * 縣市 Hover 事件 - 農業風格互動
+   */
   private onCountyHover(event: any, d: any): void {
     // Remove any existing tooltips first
     d3.selectAll('.map-tooltip').remove();
 
     const county = event.target;
+    // Hover 時使用麥稈焦糖色 (accent-500)
     d3.select(county)
-      .attr('fill', '#e74c3c')
-      .attr('stroke-width', 2);
+      .attr('fill', '#D4A373') // accent-500
+      .attr('stroke', '#2D5A27') // primary-500
+      .attr('stroke-width', 2.5);
 
-    // Show tooltip
+    // Show tooltip with agriculture style
     d3.select('body')
       .append('div')
       .attr('class', 'map-tooltip')
       .style('position', 'absolute')
-      .style('background', 'rgba(0, 0, 0, 0.8)')
-      .style('color', 'white')
-      .style('padding', '8px')
-      .style('border-radius', '4px')
-      .style('font-size', '12px')
+      .style('background', 'linear-gradient(135deg, #2D5A27 0%, #24481F 100%)')
+      .style('color', '#FCFAF8') // beige-100
+      .style('padding', '10px 14px')
+      .style('border-radius', '8px')
+      .style('font-size', '13px')
+      .style('font-weight', '500')
       .style('pointer-events', 'none')
       .style('z-index', '1000')
+      .style('border', '1px solid #479737') // primary-400
+      .style('letter-spacing', '0.025em')
       .html(d.properties.COUNTYNAME)
-      .style('left', (event.pageX + 10) + 'px')
-      .style('top', (event.pageY - 10) + 'px');
+      .style('left', (event.pageX + 12) + 'px')
+      .style('top', (event.pageY - 12) + 'px');
   }
 
   private onCountyMouseOut(event?: any): void {
@@ -273,12 +298,25 @@ export class TaiwanMap implements OnInit, AfterViewInit, OnDestroy {
     d3.select('body').selectAll('.map-tooltip').remove();
   }
 
+  /**
+   * 縣市點擊事件 - 顯示彈窗並縮放至該縣市
+   */
   private onCountyClick(d: any): void {
     const countyName = d.properties.COUNTYNAME;
     const county = this.counties.find(c => c.id === countyName);
 
     if (county) {
-      this.selectedCounty = county;
+      // 取得該縣市的氣象資料
+      const weatherData = this.countyWeatherMap.get(countyName);
+
+      // 顯示縣市氣象資訊彈窗
+      this.dialogService.showCountyInfo({
+        id: county.id,
+        name: county.name,
+        weatherData: weatherData
+      });
+
+      // 發送事件給父組件（如果需要）
       this.countySelected.emit(county);
     }
 
@@ -299,74 +337,83 @@ export class TaiwanMap implements OnInit, AfterViewInit, OnDestroy {
       );
   }
 
+  /**
+   * 添加縮放控制按鈕 - 農業風格設計
+   */
   private addZoomControls(): void {
     const controls = this.svg.append('g')
       .attr('class', 'zoom-controls')
       .attr('transform', 'translate(20, 20)');
 
-    // Zoom in button
+    // Zoom in button - 放大
     const zoomInGroup = controls.append('g')
       .attr('class', 'zoom-control zoom-in')
       .style('cursor', 'pointer')
       .on('click', () => this.zoomIn());
 
     zoomInGroup.append('rect')
-      .attr('width', 30)
-      .attr('height', 30)
-      .attr('fill', 'white')
-      .attr('stroke', '#ccc')
-      .attr('rx', 3);
+      .attr('width', 36)
+      .attr('height', 36)
+      .attr('fill', '#FFFFFF')
+      .attr('stroke', '#8B9D77') // secondary-500
+      .attr('stroke-width', 2)
+      .attr('rx', 6);
 
     zoomInGroup.append('text')
-      .attr('x', 15)
-      .attr('y', 20)
+      .attr('x', 18)
+      .attr('y', 23)
       .attr('text-anchor', 'middle')
-      .attr('font-size', '18px')
+      .attr('font-size', '20px')
       .attr('font-weight', 'bold')
+      .attr('fill', '#2D5A27') // primary-500
       .text('+');
 
-    // Zoom out button
+    // Zoom out button - 縮小
     const zoomOutGroup = controls.append('g')
       .attr('class', 'zoom-control zoom-out')
-      .attr('transform', 'translate(0, 35)')
+      .attr('transform', 'translate(0, 42)')
       .style('cursor', 'pointer')
       .on('click', () => this.zoomOut());
 
     zoomOutGroup.append('rect')
-      .attr('width', 30)
-      .attr('height', 30)
-      .attr('fill', 'white')
-      .attr('stroke', '#ccc')
-      .attr('rx', 3);
+      .attr('width', 36)
+      .attr('height', 36)
+      .attr('fill', '#FFFFFF')
+      .attr('stroke', '#8B9D77') // secondary-500
+      .attr('stroke-width', 2)
+      .attr('rx', 6);
 
     zoomOutGroup.append('text')
-      .attr('x', 15)
-      .attr('y', 20)
+      .attr('x', 18)
+      .attr('y', 23)
       .attr('text-anchor', 'middle')
-      .attr('font-size', '18px')
+      .attr('font-size', '20px')
       .attr('font-weight', 'bold')
+      .attr('fill', '#2D5A27') // primary-500
       .text('−');
 
-    // Reset zoom button
+    // Reset zoom button - 重置
     const resetGroup = controls.append('g')
       .attr('class', 'zoom-control zoom-reset')
-      .attr('transform', 'translate(0, 70)')
+      .attr('transform', 'translate(0, 84)')
       .style('cursor', 'pointer')
       .on('click', () => this.resetZoom());
 
     resetGroup.append('rect')
-      .attr('width', 30)
-      .attr('height', 30)
-      .attr('fill', 'white')
-      .attr('stroke', '#ccc')
-      .attr('rx', 3);
+      .attr('width', 36)
+      .attr('height', 36)
+      .attr('fill', '#FFFFFF')
+      .attr('stroke', '#8B9D77') // secondary-500
+      .attr('stroke-width', 2)
+      .attr('rx', 6);
 
     resetGroup.append('text')
-      .attr('x', 15)
-      .attr('y', 20)
+      .attr('x', 18)
+      .attr('y', 23)
       .attr('text-anchor', 'middle')
-      .attr('font-size', '12px')
+      .attr('font-size', '16px')
       .attr('font-weight', 'bold')
+      .attr('fill', '#2D5A27') // primary-500
       .text('⌂');
   }
 
@@ -391,5 +438,111 @@ export class TaiwanMap implements OnInit, AfterViewInit, OnDestroy {
 
   public getCountyInfo(countyId: string): TaiwanCounty | undefined {
     return this.counties.find(c => c.id === countyId);
+  }
+
+  /**
+   * 載入氣象測站資料並計算各縣市平均值
+   */
+  private loadWeatherData(): void {
+    this.dataService.getWeather().subscribe({
+      next: (response) => {
+        if (response.Data && response.Data.length > 0) {
+          // 將 WeatherType 轉換為 AutoWeatherStation 格式
+          const convertedData = this.convertWeatherTypeToAutoWeatherStation(response.Data);
+          this.calculateCountyWeatherAverages(convertedData);
+        }
+      },
+      error: (error) => {
+        console.error('載入氣象資料失敗:', error);
+        // 使用 Mock 資料作為備援
+        const mockData = this.dataService.getMockWeatherStation();
+        if (mockData.Data && mockData.Data.length > 0) {
+          this.calculateCountyWeatherAverages(mockData.Data);
+        }
+      }
+    });
+  }
+
+  /**
+   * 將 WeatherType (字串欄位) 轉換為 AutoWeatherStation (數值欄位)
+   */
+  private convertWeatherTypeToAutoWeatherStation(weatherData: WeatherType[]): AutoWeatherStation[] {
+    return weatherData.map(w => {
+      const converted: Omit<AutoWeatherStation, 'VIRTUAL_SOIL_HUMD'> = {
+        Start_time: '', // WeatherType 沒有這個欄位
+        End_time: '',   // WeatherType 沒有這個欄位
+        Station_name: w.Station_name,
+        Station_ID: w.Station_ID,
+        Station_Latitude: parseFloat(w.Station_Latitude) || 0,
+        Station_Longitude: parseFloat(w.Station_Longitude) || 0,
+        TIME: w.TIME,
+        ELEV: parseFloat(w.ELEV) || 0,
+        WDIR: parseFloat(w.WDIR) || 0,
+        WDSD: parseFloat(w.WDSD) || 0,
+        TEMP: parseFloat(w.TEMP) || 0,
+        HUMD: parseFloat(w.HUMD) || 0,
+        PRES: parseFloat(w.PRES) || 0,
+        SUN: parseFloat(w.SUN) || 0,
+        H_24R: parseFloat(w.H_24R) || 0,
+        CITY: w.CITY,
+        CITY_SN: parseInt(w.CITY_SN) || 0,
+        TOWN: w.TOWN,
+        TOWN_SN: parseInt(w.TOWN_SN) || 0,
+      };
+
+      // 計算虛擬土壤濕度
+      const withSoilMoisture: AutoWeatherStation = {
+        ...converted,
+        VIRTUAL_SOIL_HUMD: this.dataService.calculateSoilMoisture(converted)
+      };
+
+      return withSoilMoisture;
+    });
+  }
+
+  /**
+   * 計算各縣市的氣象平均值
+   * @param stations 所有測站資料
+   */
+  private calculateCountyWeatherAverages(stations: AutoWeatherStation[]): void {
+    // 按縣市分組
+    const countyGroups = new Map<string, AutoWeatherStation[]>();
+
+    stations.forEach(station => {
+      const county = station.CITY;
+      if (!countyGroups.has(county)) {
+        countyGroups.set(county, []);
+      }
+      countyGroups.get(county)!.push(station);
+    });
+
+    // 計算每個縣市的平均值
+    countyGroups.forEach((stationList, countyName) => {
+      const avgData: CountyWeatherData = {
+        countyName: countyName,
+        citySn: stationList[0].CITY_SN,
+        stationCount: stationList.length,
+        avgTemp: this.calculateAverage(stationList.map(s => s.TEMP)),
+        avgHumd: this.calculateAverage(stationList.map(s => s.HUMD)),
+        avgPres: this.calculateAverage(stationList.map(s => s.PRES)),
+        avgSun: this.calculateAverage(stationList.map(s => s.SUN)),
+        avgRainfall: this.calculateAverage(stationList.map(s => s.H_24R)),
+        avgSoilMoisture: this.calculateAverage(stationList.map(s => s.VIRTUAL_SOIL_HUMD)),
+        lastUpdateTime: stationList[0].TIME
+      };
+
+      this.countyWeatherMap.set(countyName, avgData);
+    });
+
+    console.log('縣市氣象資料已載入:', this.countyWeatherMap.size, '個縣市');
+  }
+
+  /**
+   * 計算數值陣列的平均值
+   */
+  private calculateAverage(values: number[]): number {
+    if (values.length === 0) return 0;
+    const sum = values.reduce((acc, val) => acc + val, 0);
+    return sum / values.length;
   }
 }

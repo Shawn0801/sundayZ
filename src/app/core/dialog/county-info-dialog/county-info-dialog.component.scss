@@ -1,0 +1,148 @@
+// ========================================
+// 縣市氣象資訊彈窗 - 混合使用 Tailwind + SCSS
+// 簡單樣式：直接在 HTML 使用 Tailwind 類別
+// 複雜樣式：SCSS（漸層、動畫、偽元素）
+// ========================================
+
+// 容器漸層背景
+.weather-dialog-container {
+  background: linear-gradient(135deg, theme('colors.beige.100') 0%, theme('colors.beige.200') 100%);
+}
+
+// ========================================
+// 氣象圖示動畫
+// ========================================
+
+.weather-icon {
+  background: linear-gradient(135deg, theme('colors.primary.400') 0%, theme('colors.primary.500') 100%);
+  box-shadow: 0 4px 12px rgba(45, 90, 39, 0.25);
+  animation: iconPulse 0.5s ease-out;
+
+  svg {
+    animation: iconDrop 0.6s ease-out;
+  }
+}
+
+@keyframes iconPulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes iconDrop {
+  0% {
+    transform: translateY(-8px) rotate(-10deg);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(2px) rotate(2deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
+  }
+}
+
+// ========================================
+// 氣象卡片（包含複雜的左側裝飾條和 Hover 效果）
+// ========================================
+
+.weather-card {
+  @apply bg-white rounded-lg p-4 border border-secondary-200 shadow-sm;
+  @apply relative overflow-hidden transition-all duration-300 ease-out;
+
+  // 左側裝飾條（漸層 + 透明度動畫）
+  &::before {
+    content: '';
+    @apply absolute left-0 top-0 bottom-0 w-1;
+    background: linear-gradient(180deg, theme('colors.primary.400') 0%, theme('colors.primary.500') 100%);
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+  }
+
+  // Hover 效果（卡片上浮 + 裝飾條高亮）
+  &:hover {
+    @apply -translate-y-0.5 shadow-md border-primary-300;
+
+    &::before {
+      opacity: 1;
+    }
+  }
+}
+
+// 更新時間卡片（特殊漸層背景）
+.weather-card-update {
+  @apply bg-white rounded-lg p-4 border border-secondary-200 shadow-sm;
+  @apply relative overflow-hidden transition-all duration-300 ease-out;
+  background: linear-gradient(135deg, rgba(139, 157, 119, 0.08) 0%, rgba(139, 157, 119, 0.04) 100%);
+
+  &::before {
+    content: '';
+    @apply absolute left-0 top-0 bottom-0 w-1;
+    background: linear-gradient(180deg, theme('colors.secondary.500') 0%, theme('colors.secondary.600') 100%);
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+  }
+
+  &:hover {
+    @apply -translate-y-0.5 shadow-md border-secondary-300;
+
+    &::before {
+      opacity: 1;
+    }
+  }
+}
+
+// ========================================
+// 按鈕（漸層背景 + 陰影動畫）
+// ========================================
+
+.weather-btn-close {
+  @apply px-8 py-3 rounded-lg font-semibold text-sm text-beige-100;
+  @apply border-none cursor-pointer tracking-wide min-w-[120px];
+  @apply transition-all duration-300 ease-out;
+  background: linear-gradient(135deg, theme('colors.primary.500') 0%, theme('colors.primary.600') 100%);
+  box-shadow: 0 4px 12px rgba(45, 90, 39, 0.3);
+
+  &:hover {
+    background: linear-gradient(135deg, theme('colors.primary.400') 0%, theme('colors.primary.500') 100%);
+    @apply -translate-y-0.5;
+    box-shadow: 0 6px 16px rgba(45, 90, 39, 0.4);
+  }
+
+  &:active {
+    @apply translate-y-0;
+    box-shadow: 0 2px 6px rgba(45, 90, 39, 0.3);
+  }
+
+  &:focus {
+    @apply outline outline-2 outline-secondary-500 outline-offset-2;
+  }
+}
+
+// ========================================
+// 響應式設計（覆蓋 Tailwind 預設）
+// ========================================
+
+@media (max-width: 640px) {
+  .weather-dialog-container {
+    @apply p-5;
+  }
+
+  .weather-card,
+  .weather-card-update {
+    @apply p-3.5;
+  }
+
+  .weather-btn-close {
+    @apply w-full py-3.5;
+  }
+}

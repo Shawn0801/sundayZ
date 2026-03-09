@@ -1,0 +1,36 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+::ng-deep {
+  .p-card {
+    border-radius: 1rem;
+    border: none;
+
+    .p-card-body {
+      padding: 0;
+    }
+
+    .p-card-content {
+      padding: 1.5rem;
+    }
+  }
+
+  .p-password input {
+    width: 100%;
+  }
+
+  .p-inputtext {
+    &.ng-invalid.ng-touched {
+      @apply border-danger-500;
+    }
+  }
+
+  .p-password {
+    &.ng-invalid.ng-touched input {
+      @apply border-danger-500;
+    }
+  }
+}

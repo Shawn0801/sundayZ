@@ -3,6 +3,7 @@ import { DialogService as PrimeDialogService } from 'primeng/dynamicdialog';
 import { ErrorDialogComponent, ErrorDialogData } from '../core/dialog/error-dialog/error-dialog.component';
 import { SuccessDialogComponent, SuccessDialogData } from '../core/dialog/success-dialog/success-dialog.component';
 import { JournalEditDialogComponent, JournalEditDialogData } from '../core/dialog/journal-edit-dialog/journal-edit-dialog.component';
+import { CountyInfoDialogComponent, CountyInfoDialogData } from '../core/dialog/county-info-dialog/county-info-dialog.component';
 
 /**
  * 共用彈窗服務
@@ -174,6 +175,46 @@ export class DialogService {
       width: '600px',
       breakpoints: {
         '960px': '90vw',
+        '640px': '95vw'
+      }
+    });
+  }
+
+  /**
+   * 顯示縣市氣象資訊彈窗
+   * @param data 縣市資料（id, name, weatherData?）
+   * @returns DynamicDialogRef
+   *
+   * @example
+   * this.dialogService.showCountyInfo({
+   *   id: '臺北市',
+   *   name: '台北市',
+   *   weatherData: {
+   *     countyName: '臺北市',
+   *     citySn: 1,
+   *     stationCount: 5,
+   *     avgTemp: 25.3,
+   *     avgHumd: 0.75,
+   *     avgPres: 1013.2,
+   *     avgSun: 6.5,
+   *     avgRainfall: 2.3,
+   *     avgSoilMoisture: 65,
+   *     lastUpdateTime: '2026-03-08 12:00:00'
+   *   }
+   * });
+   */
+  showCountyInfo(data: CountyInfoDialogData) {
+    return this.primeDialogService.open(CountyInfoDialogComponent, {
+      data,
+      header: ' ', // 空白標題（使用元件內的標題）
+      modal: true,
+      dismissableMask: true, // 點擊遮罩關閉
+      closable: false, // 不顯示右上角 X
+      styleClass: 'dialog-custom county-weather-dialog',
+      baseZIndex: 10000,
+      width: '650px',
+      breakpoints: {
+        '960px': '85vw',
         '640px': '95vw'
       }
     });

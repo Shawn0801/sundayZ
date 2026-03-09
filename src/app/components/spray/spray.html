@@ -1,5 +1,23 @@
 <div class="flex flex-col gap-4">
 
+  <!-- 載入中狀態 -->
+  @if (loading) {
+    <div class="flex flex-col items-center justify-center py-8">
+      <div class="w-8 h-8 border-4 border-primary-200 border-t-primary rounded-full animate-spin"></div>
+      <p class="text-xs text-surface-500 mt-2">載入中...</p>
+    </div>
+  }
+
+  <!-- 錯誤訊息 -->
+  @if (error && !loading) {
+    <div class="bg-danger-50 border-l-4 border-danger-500 rounded-lg p-3 text-center">
+      <p class="text-xs text-danger-700">{{ error }}</p>
+    </div>
+  }
+
+  <!-- 主要內容 -->
+  @if (!loading && !error && station) {
+
   <!-- 土壤濕度預估 -->
   <div>
     <h3 class="text-sm font-semibold text-primary mb-0.5">土壤濕度預估</h3>
@@ -35,32 +53,102 @@
   <!-- 環境即時觀測 -->
   <div>
     <h3 class="text-sm font-semibold text-primary mb-0.5">環境即時觀測</h3>
-    <p class="text-xs text-surface-400 mb-3">{{ stationName }} 即時資料</p>
+    <p class="text-xs text-surface-400 mb-3">選擇測站查看即時資料</p>
+
+    <!-- 測站選單（按縣市分組） -->
+    <div class="mb-3">
+      <p-select
+        [(ngModel)]="selectedStationId"
+        [options]="stationGroups"
+        [group]="true"
+        optionLabel="Station_name"
+        optionValue="Station_ID"
+        (onChange)="onStationChange($event.value)"
+        [filter]="true"
+        filterPlaceholder="搜尋測站..."
+        placeholder="請選擇測站"
+        class="w-full"
+      >
+        <ng-template pTemplate="group" let-group>
+          <div class="flex items-center gap-2 font-semibold text-primary">
+            <i class="pi pi-map text-xs"></i>
+            <span class="text-xs">{{ group.label }}</span>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="item" let-option>
+          <div class="flex items-center gap-2 pl-4">
+            <i class="pi pi-map-marker text-secondary text-xs"></i>
+            <span class="text-xs">{{ option.Station_name }}</span>
+          </div>
+        </ng-template>
+      </p-select>
+    </div>
 
     <div class="flex flex-col gap-3">
-      <!-- 空氣溫度 -->
-      <div class="flex items-center justify-between">
-        <span class="text-xs text-surface-500">空氣溫度</span>
-        <span class="text-sm font-semibold text-danger-500">{{ temperature }} °C</span>
-      </div>
-
-      <!-- 空氣濕度 -->
-      <div class="flex items-center justify-between gap-3">
-        <span class="text-xs text-surface-500 shrink-0">空氣濕度</span>
-        <div class="flex items-center gap-2 flex-1">
-          <div class="flex-1 h-1.5 bg-surface-200 rounded-full overflow-hidden">
-            <div class="h-full bg-info-400 rounded-full transition-all duration-500" [style.width.%]="humidity"></div>
+      <!-- 空氣溫度 - 圖表化顯示 -->
+      <div class="bg-beige-50 rounded-lg p-3 border border-beige-200">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-surface-600 font-medium">空氣溫度</span>
+          <span class="text-lg font-bold" [ngClass]="temperatureColor">{{ temperature.toFixed(1) }} °C</span>
+        </div>
+        <!-- 溫度計視覺化 -->
+        <div class="flex items-center gap-2">
+          <i class="pi pi-sun text-warning-500 text-sm"></i>
+          <div class="flex-1 h-2 bg-surface-200 rounded-full overflow-hidden">
+            <div
+              class="h-full rounded-full transition-all duration-500"
+              [style.width.%]="temperature > 0 ? (temperature / 45 * 100) : 0"
+              [ngClass]="{
+                'bg-danger-500': temperature >= 35,
+                'bg-warning-500': temperature >= 28 && temperature < 35,
+                'bg-success-500': temperature >= 18 && temperature < 28,
+                'bg-info-500': temperature >= 10 && temperature < 18,
+                'bg-primary-500': temperature < 10
+              }">
+            </div>
           </div>
-          <span class="text-xs font-medium text-surface-600 w-10 text-right">{{ humidity }} %</span>
+          <span class="text-xs text-surface-400 w-8">45°C</span>
         </div>
       </div>
 
-      <!-- 24h 累積雨量 -->
-      <div class="flex items-center justify-between">
-        <span class="text-xs text-surface-500">24h 累積雨量</span>
-        <span class="text-xs font-medium bg-info-50 text-info-700 px-2 py-0.5 rounded-full">{{ rainfall }} mm</span>
+      <!-- 空氣濕度 - 圖表化顯示 -->
+      <div class="bg-beige-50 rounded-lg p-3 border border-beige-200">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-surface-600 font-medium">空氣濕度</span>
+          <span class="text-lg font-bold text-info-600">{{ humidity }} %</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i class="pi pi-cloud text-info-500 text-sm"></i>
+          <div class="flex-1 h-2 bg-surface-200 rounded-full overflow-hidden">
+            <div
+              class="h-full bg-info-400 rounded-full transition-all duration-500"
+              [style.width.%]="humidity">
+            </div>
+          </div>
+          <span class="text-xs text-surface-400 w-10">100%</span>
+        </div>
+      </div>
+
+      <!-- 24h 累積雨量 - 圖表化顯示 -->
+      <div class="bg-beige-50 rounded-lg p-3 border border-beige-200">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-surface-600 font-medium">24h 累積雨量</span>
+          <span class="text-lg font-bold text-info-600">{{ rainfall.toFixed(1) }} mm</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i class="pi pi-bolt text-info-500 text-sm"></i>
+          <div class="flex-1 h-2 bg-surface-200 rounded-full overflow-hidden">
+            <div
+              class="h-full rounded-full transition-all duration-500"
+              [ngClass]="rainfallColor"
+              [style.width.%]="rainfall > 0 ? Math.min((rainfall / 100 * 100), 100) : 0">
+            </div>
+          </div>
+          <span class="text-xs text-surface-400 w-10">100mm</span>
+        </div>
       </div>
     </div>
   </div>
 
+  }
 </div>
