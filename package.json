@@ -5,8 +5,10 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "deploy": "ng build --configuration production && ng deploy --base-href=/sundayZ/",
     "clean": "rm -rf .angular/cache node_modules/.vite",
     "clean:start": "npm run clean && npm start",
     "restart": "lsof -ti:4200 | xargs kill -9 2>/dev/null || true && npm run clean && npm start"
