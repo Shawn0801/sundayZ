@@ -6,7 +6,6 @@
  * - 生產環境：使用完整 URL（直接請求）
  */
 
-import { environment } from '../../environments/environment';
 
 interface ApiConfig {
   moa: string;
