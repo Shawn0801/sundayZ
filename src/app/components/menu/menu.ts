@@ -37,6 +37,7 @@ export class Menu implements OnInit {
       { label: '首頁儀表板', icon: 'pi pi-home', routerLink: '/dashboard' },
       { label: '交易行情', icon: 'pi pi-chart-line', routerLink: '/market' },
       { label: '田間日誌', icon: 'pi pi-book', routerLink: '/journal' },
+      { label: '偵測蟲害助手', icon: 'pi pi-bolt', routerLink: '/insectDamge' },
     ]);
   }
 

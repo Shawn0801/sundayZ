@@ -5,6 +5,7 @@ import { Dashboard } from './components/dashboard/dashboard';
 import { Market } from './components/market/market';
 import { Login } from './components/auth/login/login';
 import { Register } from './components/auth/register/register';
+import { InsectDamge } from './components/insect-damge/insect-damge';
 
 export const routes: Routes = [
   // 預設路由：導向 Dashboard
@@ -34,6 +35,11 @@ export const routes: Routes = [
     path: 'register',
     component: Register,
     title: '註冊'
+  },
+  {
+    path: 'insectDamge',
+    component: InsectDamge,
+    title: '偵測蟲害助手'
   },
   // 404 路由
   { path: '**', redirectTo: '/dashboard' }
