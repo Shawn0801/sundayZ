@@ -7,6 +7,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { DialogService } from 'primeng/dynamicdialog';
+import { authInterceptor } from './interceptors/auth.interceptor';
+import { tokenRefreshInterceptor } from './interceptors/token-refresh.interceptor';
 import { errorInterceptor } from './interceptors/error.interceptor';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth } from '@angular/fire/auth';
@@ -19,7 +21,11 @@ export function getAppConfig(environment: Environment): ApplicationConfig {
       provideZoneChangeDetection({ eventCoalescing: true }),
       provideRouter(routes, withComponentInputBinding()),
       provideHttpClient(
-        withInterceptors([errorInterceptor])
+        withInterceptors([
+          authInterceptor,        // 🔐 自動加 Token
+          tokenRefreshInterceptor, // 🔄 Token 刷新
+          errorInterceptor        // ⚠️ 一般錯誤處理
+        ])
       ),
       provideAnimationsAsync(),
       providePrimeNG({

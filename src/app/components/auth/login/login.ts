@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -31,16 +31,21 @@ export class Login {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   loginForm: FormGroup;
   loading = false;
   errorMessage: string | null = null;
+  private returnUrl: string = '/dashboard';
 
   constructor() {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+
+    // 從查詢參數取得 returnUrl
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
   }
 
 
@@ -62,7 +67,7 @@ export class Login {
         const token = await userCredential.user.getIdToken();
         this.authService.saveToken(token);
 
-        this.router.navigate(['/dashboard']);
+        this.router.navigate([this.returnUrl]);
       },
       error: (error) => {
         this.loading = false;
@@ -81,7 +86,7 @@ export class Login {
         const token = await userCredential.user.getIdToken();
         this.authService.saveToken(token);
 
-        this.router.navigate(['/dashboard']);
+        this.router.navigate([this.returnUrl]);
       },
       error: (error) => {
         this.loading = false;

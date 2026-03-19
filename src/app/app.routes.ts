@@ -6,6 +6,7 @@ import { Market } from './components/market/market';
 import { Login } from './components/auth/login/login';
 import { Register } from './components/auth/register/register';
 import { InsectDamge } from './components/insect-damge/insect-damge';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   // 預設路由：導向 Dashboard
@@ -39,7 +40,8 @@ export const routes: Routes = [
   {
     path: 'insectDamge',
     component: InsectDamge,
-    title: '偵測蟲害助手'
+    title: '偵測蟲害助手',
+    canActivate: [authGuard]
   },
   // 404 路由
   { path: '**', redirectTo: '/dashboard' }

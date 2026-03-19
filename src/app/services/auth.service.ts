@@ -142,6 +142,20 @@ export class AuthService {
   }
 
   /**
+   * Check if the current token is valid
+   * @returns Promise<boolean> - true if token exists and is valid
+   */
+  async isTokenValid(): Promise<boolean> {
+    try {
+      const token = await this.getIdToken();
+      return !!token; // Firebase SDK 會自動驗證 Token 有效性
+    } catch (error) {
+      console.error('Token validation failed:', error);
+      return false;
+    }
+  }
+
+  /**
    * Save token to local storage
    */
   saveToken(token: string): void {
