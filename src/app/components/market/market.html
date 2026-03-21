@@ -9,174 +9,234 @@
         <!-- 作物選單 -->
         <div class="flex items-center gap-2">
           <label class="text-sm text-surface-600 font-medium whitespace-nowrap">作物：</label>
-          <p-select
-            [(ngModel)]="selectedCropCode"
-            [options]="allCrops"
-            optionLabel="CropName"
-            optionValue="CropCode"
-            (onChange)="onCropChange($event.value)"
-            [filter]="true"
-            filterPlaceholder="搜尋作物..."
-            placeholder="請選擇作物"
-            class="w-64"
-          />
+          <p-select [(ngModel)]="selectedCropCode" [options]="allCrops" optionLabel="CropName" optionValue="CropCode"
+            (onChange)="onCropChange($event.value)" [filter]="true" filterPlaceholder="搜尋作物..." placeholder="請選擇作物"
+            class="w-64" />
         </div>
 
         <!-- 市場選單 -->
         <div class="flex items-center gap-2">
           <label class="text-sm text-surface-600 font-medium whitespace-nowrap">市場：</label>
-          <p-select
-            [(ngModel)]="selectedMarketCode"
-            [options]="availableMarkets"
-            optionLabel="MarketName"
-            optionValue="MarketCode"
-            (onChange)="onMarketChange($event.value)"
-            [filter]="true"
-            filterPlaceholder="搜尋市場..."
-            placeholder="請選擇市場"
-            [disabled]="availableMarkets.length === 0"
-            class="w-64"
-          />
+          <p-select [(ngModel)]="selectedMarketCode" [options]="availableMarkets" optionLabel="MarketName"
+            optionValue="MarketCode" (onChange)="onMarketChange($event.value)" [filter]="true"
+            filterPlaceholder="搜尋市場..." placeholder="請選擇市場" [disabled]="availableMarkets.length === 0" class="w-64" />
         </div>
       </div>
     </div>
 
     <!-- 載入中狀態 -->
     @if (loading) {
-      <div class="flex flex-col items-center justify-center py-16">
-        <div class="w-12 h-12 border-4 border-primary-200 border-t-primary rounded-full animate-spin"></div>
-        <p class="text-surface-500 mt-4">載入資料中...</p>
-      </div>
+    <div class="flex flex-col items-center justify-center py-16">
+      <div class="w-12 h-12 border-4 border-primary-200 border-t-primary rounded-full animate-spin"></div>
+      <p class="text-surface-500 mt-4">載入資料中...</p>
+    </div>
     }
 
     <!-- 錯誤訊息 -->
     @if (error && !loading) {
-      <div class="bg-danger-50 border-2 border-danger-200 rounded-xl p-8 text-center">
-        <i class="pi pi-exclamation-triangle text-4xl text-danger-500 mb-4"></i>
-        <p class="text-danger-700 mb-4">{{ error }}</p>
-        <button
-          (click)="loadData()"
-          class="bg-primary hover:bg-primary-600 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-sm hover:shadow-md">
-          重試
-        </button>
-      </div>
+    <div class="bg-danger-50 border-2 border-danger-200 rounded-xl p-8 text-center">
+      <i class="pi pi-exclamation-triangle text-4xl text-danger-500 mb-4"></i>
+      <p class="text-danger-700 mb-4">{{ error }}</p>
+      <button (click)="loadData()"
+        class="bg-primary hover:bg-primary-600 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-sm hover:shadow-md">
+        重試
+      </button>
+    </div>
     }
 
     <!-- 圖表區域 -->
     @if (!loading && !error) {
-      <div class="space-y-6">
-        <!-- 週期切換按鈕 -->
-        <div class="flex justify-center gap-3">
-          <button
-            [class]="selectedPeriod === 'today'
+    <div class="space-y-6">
+      <!-- 週期切換按鈕 -->
+      <div class="flex justify-center gap-3">
+        <button [class]="selectedPeriod === 'today'
               ? 'bg-primary text-white shadow-md'
               : 'bg-white text-surface-600 border-2 border-surface-200 hover:border-primary-200'"
-            class="px-6 py-2.5 rounded-lg font-medium transition-all"
-            (click)="switchPeriod('today')">
-            今日
-          </button>
-          <button
-            [class]="selectedPeriod === 'week'
+          class="px-6 py-2.5 rounded-lg font-medium transition-all" (click)="switchPeriod('today')">
+          今日
+        </button>
+        <button [class]="selectedPeriod === 'week'
               ? 'bg-primary text-white shadow-md'
               : 'bg-white text-surface-600 border-2 border-surface-200 hover:border-primary-200'"
-            class="px-6 py-2.5 rounded-lg font-medium transition-all"
-            (click)="switchPeriod('week')">
-            近七日
-          </button>
-          <button
-            [class]="selectedPeriod === 'month'
+          class="px-6 py-2.5 rounded-lg font-medium transition-all" (click)="switchPeriod('week')">
+          近七日
+        </button>
+        <button [class]="selectedPeriod === 'month'
               ? 'bg-primary text-white shadow-md'
               : 'bg-white text-surface-600 border-2 border-surface-200 hover:border-primary-200'"
-            class="px-6 py-2.5 rounded-lg font-medium transition-all"
-            (click)="switchPeriod('month')">
-            近三十日
-          </button>
-        </div>
+          class="px-6 py-2.5 rounded-lg font-medium transition-all" (click)="switchPeriod('month')">
+          近三十日
+        </button>
+      </div>
 
-        <!-- 圖表 Canvas -->
-        <div class="bg-white rounded-xl p-6 shadow-sm border-2 border-primary-50">
-          <div class="w-full h-[400px]">
-            <canvas #chartCanvas></canvas>
-          </div>
-        </div>
-
-        <!-- 資訊卡片 -->
-        @if (currentCrop) {
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border-2 border-beige-200">
-              <div class="flex items-center gap-2 mb-2">
-                <i class="pi pi-calendar text-primary"></i>
-                <span class="text-xs text-surface-500 font-medium">交易日期</span>
-              </div>
-              <div class="text-lg font-semibold text-text">{{ currentCrop.TransDate }}</div>
-            </div>
-
-            <div class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border-2 border-primary-200">
-              <div class="flex items-center gap-2 mb-2">
-                <i class="pi pi-chart-line text-primary"></i>
-                <span class="text-xs text-surface-500 font-medium">平均價格</span>
-              </div>
-              <div class="text-lg font-semibold text-primary">{{ currentCrop.Avg_Price }} 元/公斤</div>
-            </div>
-
-            <div class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border-2 border-accent-200">
-              <div class="flex items-center gap-2 mb-2">
-                <i class="pi pi-arrow-right-arrow-left text-accent-600"></i>
-                <span class="text-xs text-surface-500 font-medium">價格區間</span>
-              </div>
-              <div class="text-lg font-semibold text-text">
-                {{ currentCrop.Lower_Price }} - {{ currentCrop.Upper_Price }} 元
-              </div>
-            </div>
-
-            <div class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border-2 border-secondary-200">
-              <div class="flex items-center gap-2 mb-2">
-                <i class="pi pi-shopping-bag text-secondary-600"></i>
-                <span class="text-xs text-surface-500 font-medium">交易量</span>
-              </div>
-              <div class="text-lg font-semibold text-text">{{ currentCrop.Trans_Quantity | number }} 公斤</div>
-            </div>
-          </div>
-        }
-
-        <!-- 說明文字 -->
-        <div class="bg-beige-50 rounded-xl p-5 border-2 border-beige-200">
-          <div class="flex flex-wrap gap-6">
-            <div class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full bg-red-500"></span>
-              @if (selectedPeriod === 'today') {
-                <span class="text-sm text-surface-600">上價：各市場最高交易價格</span>
-              } @else {
-                <span class="text-sm text-surface-600">最高價：每日最高交易價格</span>
-              }
-            </div>
-
-            <div class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full bg-blue-500"></span>
-              <span class="text-sm text-surface-600">平均價：所有交易的平均價格</span>
-            </div>
-
-            @if (selectedPeriod === 'today') {
-              <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                <span class="text-sm text-surface-600">中價：市場中間價格</span>
-              </div>
-            } @else {
-              <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                <span class="text-sm text-surface-600">最低價：每日最低交易價格</span>
-              </div>
-            }
-
-            @if (selectedPeriod === 'today') {
-              <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-purple-500"></span>
-                <span class="text-sm text-surface-600">下價：各市場最低交易價格</span>
-              </div>
-            }
-          </div>
+      <!-- 圖表 Canvas -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border-2 border-primary-50">
+        <div class="w-full h-[400px]">
+          <canvas #chartCanvas></canvas>
         </div>
       </div>
+
+      <!-- AI 價格預測區域 -->
+      <div class="bg-gradient-to-r from-primary-50 to-accent-50 rounded-xl p-6 shadow-sm border-2 border-primary-100">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <i class="pi pi-sparkles text-white text-xl"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-text">AI 價格預測</h3>
+              <p class="text-xs text-surface-600">基於 GCP Vertex AI 模型預測未來價格</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 載入中狀態 -->
+        @if (riskLoading) {
+        <div class="flex items-center justify-center py-8">
+          <div class="w-8 h-8 border-4 border-primary-200 border-t-primary rounded-full animate-spin"></div>
+          <span class="ml-3 text-surface-600">AI 分析中...</span>
+        </div>
+        }
+
+        <!-- 錯誤訊息 -->
+        @if (riskError && !riskLoading) {
+        <div class="bg-danger-50 border border-danger-200 rounded-lg p-4 flex items-center gap-3">
+          <i class="pi pi-exclamation-triangle text-danger-500"></i>
+          <span class="text-danger-700 text-sm">{{ riskError }}</span>
+        </div>
+        }
+
+        <!-- 預測結果 -->
+        @if (riskPrediction && !riskLoading && !riskError) {
+        <div class="grid grid-cols-1 md:grid-cols-3">
+          <!-- 預測價格 -->
+          <div class="bg-white rounded-lg p-4 text-center">
+            <div class="text-xs text-surface-500 mb-1">預測平均價格</div>
+            <div class="text-3xl font-bold text-primary">
+              {{ riskPrediction.predictions[0]?.value | number:'1.2-2' }}
+            </div>
+            <div class="text-xs text-surface-600 mt-1">元/公斤</div>
+          </div>
+
+          <!-- 信賴區間下界 -->
+          <!-- <div class="bg-white rounded-lg p-4 text-center">
+            <div class="text-xs text-surface-500 mb-1">95% 信賴區間 (下界)</div>
+            <div class="text-2xl font-bold text-warning-600">
+              {{ riskPrediction.predictions[0]?.lower_bound | number:'1.2-2' }}
+            </div>
+            <div class="text-xs text-surface-600 mt-1">元/公斤</div>
+          </div> -->
+
+          <!-- 信賴區間上界 -->
+          <!-- <div class="bg-white rounded-lg p-4 text-center">
+            <div class="text-xs text-surface-500 mb-1">95% 信賴區間 (上界)</div>
+            <div class="text-2xl font-bold text-success-600">
+              {{ riskPrediction.predictions[0]?.upper_bound | number:'1.2-2' }}
+            </div>
+            <div class="text-xs text-surface-600 mt-1">元/公斤</div>
+          </div> -->
+        </div>
+
+        <!-- 說明文字 -->
+        <div class="mt-4 bg-white/50 rounded-lg p-3">
+          <p class="text-xs text-surface-600 leading-relaxed">
+            <i class="pi pi-info-circle mr-1"></i>
+            此預測結合當前氣象條件（溫度、濕度、降雨等）與歷史交易資料，透過 AI 模型分析未來價格趨勢。
+
+          </p>
+        </div>
+        }
+
+        <!-- 初始提示 -->
+        @if (!riskPrediction && !riskLoading && !riskError) {
+        <div class="text-center py-6">
+          <i class="pi pi-info-circle text-4xl text-surface-300 mb-3"></i>
+          <p class="text-surface-600">選擇作物和市場後，系統將自動進行 AI 價格預測</p>
+        </div>
+        }
+      </div>
+
+      <!-- 資訊卡片 -->
+      @if (currentCrop) {
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div
+          class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border-2 border-beige-200">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="pi pi-calendar text-primary"></i>
+            <span class="text-xs text-surface-500 font-medium">交易日期</span>
+          </div>
+          <div class="text-lg font-semibold text-text">{{ currentCrop.TransDate }}</div>
+        </div>
+
+        <div
+          class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border-2 border-primary-200">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="pi pi-chart-line text-primary"></i>
+            <span class="text-xs text-surface-500 font-medium">平均價格</span>
+          </div>
+          <div class="text-lg font-semibold text-primary">{{ currentCrop.Avg_Price }} 元/公斤</div>
+        </div>
+
+        <div
+          class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border-2 border-accent-200">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="pi pi-arrow-right-arrow-left text-accent-600"></i>
+            <span class="text-xs text-surface-500 font-medium">價格區間</span>
+          </div>
+          <div class="text-lg font-semibold text-text">
+            {{ currentCrop.Lower_Price }} - {{ currentCrop.Upper_Price }} 元
+          </div>
+        </div>
+
+        <div
+          class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border-2 border-secondary-200">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="pi pi-shopping-bag text-secondary-600"></i>
+            <span class="text-xs text-surface-500 font-medium">交易量</span>
+          </div>
+          <div class="text-lg font-semibold text-text">{{ currentCrop.Trans_Quantity | number }} 公斤</div>
+        </div>
+      </div>
+      }
+
+      <!-- 說明文字 -->
+      <div class="bg-beige-50 rounded-xl p-5 border-2 border-beige-200">
+        <div class="flex flex-wrap gap-6">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+            @if (selectedPeriod === 'today') {
+            <span class="text-sm text-surface-600">上價：各市場最高交易價格</span>
+            } @else {
+            <span class="text-sm text-surface-600">最高價：每日最高交易價格</span>
+            }
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+            <span class="text-sm text-surface-600">平均價：所有交易的平均價格</span>
+          </div>
+
+          @if (selectedPeriod === 'today') {
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-500"></span>
+            <span class="text-sm text-surface-600">中價：市場中間價格</span>
+          </div>
+          } @else {
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-500"></span>
+            <span class="text-sm text-surface-600">最低價：每日最低交易價格</span>
+          </div>
+          }
+
+          @if (selectedPeriod === 'today') {
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-purple-500"></span>
+            <span class="text-sm text-surface-600">下價：各市場最低交易價格</span>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
     }
   </div>
 </div>

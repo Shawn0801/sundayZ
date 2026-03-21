@@ -1,9 +1,12 @@
 import { Component, inject, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
 import { DataService } from '../../services/data-service';
+import { ConfigService } from '../../services/config.service';
 import { AgriProduct } from '../../interfaces/AgriProductsTransTypeRes';
+import { AgriRiskPredictResponse } from '../../interfaces/AgriRiskRes';
+import { AutoWeatherStation } from '../../interfaces/AutoWeatherStationRes';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 
 // 註冊 Chart.js 所有元件
@@ -24,7 +27,7 @@ interface MarketOption {
 @Component({
   selector: 'app-market',
   standalone: true,
-  imports: [CommonModule, FormsModule, Select],
+  imports: [CommonModule, FormsModule, Select, DecimalPipe],
   templateUrl: './market.html',
   styleUrl: './market.scss'
 })
@@ -32,6 +35,7 @@ export class Market implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('chartCanvas') chartCanvas!: ElementRef<HTMLCanvasElement>;
 
   private dataService = inject(DataService);
+  private configService = inject(ConfigService);
   private chart: Chart | null = null;
 
   // 狀態管理
@@ -55,8 +59,15 @@ export class Market implements OnInit, AfterViewInit, OnDestroy {
   weekData: AgriProduct[] = [];
   monthData: AgriProduct[] = [];
 
+  // 價格預測相關
+  riskPrediction: AgriRiskPredictResponse | null = null;
+  riskLoading = false;
+  riskError: string | null = null;
+  weatherStation: AutoWeatherStation | null = null;
+
   ngOnInit(): void {
     this.loadData();
+    this.loadWeatherData();
   }
 
   ngAfterViewInit(): void {
@@ -284,6 +295,9 @@ export class Market implements OnInit, AfterViewInit, OnDestroy {
 
     // 更新圖表資料（使用預設的「所有市場」）
     this.updateChartData(cropCode, this.selectedMarketCode!);
+
+    // 自動觸發價格預測
+    this.callAgriRiskAPI();
   }
 
   /**
@@ -296,6 +310,9 @@ export class Market implements OnInit, AfterViewInit, OnDestroy {
     if (this.selectedCropCode) {
       this.updateChartData(this.selectedCropCode, marketCode);
     }
+
+    // 自動觸發價格預測
+    this.callAgriRiskAPI();
   }
 
   /**
@@ -551,5 +568,82 @@ export class Market implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     };
+  }
+
+  /**
+   * 載入氣象資料
+   */
+  loadWeatherData(): void {
+    this.dataService.getMockWeatherStation().Data.forEach(station => {
+      if (this.weatherStation === null) {
+        this.weatherStation = station;
+      }
+    });
+  }
+
+  /**
+   * 呼叫價格預測 API
+   */
+  callAgriRiskAPI(): void {
+    // 檢查必要條件
+    if (!this.weatherStation) {
+      console.warn('氣象資料尚未載入');
+      return;
+    }
+
+    if (!this.selectedCropCode || !this.currentCrop) {
+      console.warn('請先選擇作物');
+      return;
+    }
+
+    this.riskLoading = true;
+    this.riskError = null;
+
+    // 取得選中的作物和市場資訊
+    const selectedCrop = this.allCrops.find(c => c.CropCode === this.selectedCropCode);
+    const selectedMarket = this.availableMarkets.find(m => m.MarketCode === this.selectedMarketCode);
+
+    if (!selectedCrop) {
+      console.error('找不到選中的作物資訊');
+      this.riskLoading = false;
+      return;
+    }
+
+    const cropName = selectedCrop.CropName;
+    const cropCode = selectedCrop.CropCode;
+    const marketName = selectedMarket?.MarketName || '台北市場';
+
+    // 使用當前作物的歷史價格資料
+    const historicalPrice = {
+      upper: this.currentCrop.Upper_Price,
+      middle: this.currentCrop.Middle_Price,
+      lower: this.currentCrop.Lower_Price,
+      quantity: this.currentCrop.Trans_Quantity
+    };
+
+    // 建立預測特徵
+    const features = this.dataService.buildAgriRiskFeatures(
+      this.weatherStation,
+      cropName,
+      cropCode,
+      marketName,
+      historicalPrice
+    );
+
+    console.log('預測特徵資料:', features);
+
+    // 呼叫 Cloud Run 代理 API
+    this.configService.predictAgriRisk(features).subscribe({
+      next: (response) => {
+        console.log('預測成功:', response);
+        this.riskPrediction = response;
+        this.riskLoading = false;
+      },
+      error: (error) => {
+        console.error('預測失敗:', error);
+        this.riskLoading = false;
+        this.riskError = '價格預測失敗，請稍後再試';
+      }
+    });
   }
 }

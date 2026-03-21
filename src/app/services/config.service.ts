@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 import { Environment } from '../models/environment.interface';
+import { AgriRiskPredictResponse } from '../interfaces/AgriRiskRes';
 
 @Injectable({
   providedIn: 'root'
@@ -47,5 +48,35 @@ export class ConfigService {
    */
   getEnvironment(): Environment | null {
     return this.environment;
+  }
+
+  /**
+   * 透過 Cloud Run 代理呼叫 agriRisk API
+   *
+   * @param features 預測特徵資料
+   * @returns Observable<AgriRiskPredictResponse>
+   *
+   * 使用範例：
+   * ```typescript
+   * const features = { agriRisk: "25.5_0.72_8.5" };
+   * this.configService.predictAgriRisk(features).subscribe({
+   *   next: (result) => console.log('預測結果:', result),
+   *   error: (error) => console.error('預測失敗:', error)
+   * });
+   * ```
+   */
+  predictAgriRisk(features: any): Observable<AgriRiskPredictResponse> {
+    const url = `${this.apiUrl}/predict`;
+
+    const headers = new HttpHeaders({
+      'X-Custom-Auth': 'nicesunday-secure-2026',
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.post<AgriRiskPredictResponse>(
+      url,
+      { features },
+      { headers }
+    );
   }
 }

@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { NgClass, JsonPipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
 import { DataService } from '../../services/data-service';
+import { ConfigService } from '../../services/config.service';
 import { AutoWeatherStation } from '../../interfaces/AutoWeatherStationRes';
 import { WeatherType } from '../../interfaces/PesticideTypeRes';
+import { AgriRiskPredictResponse } from '../../interfaces/AgriRiskRes';
 
 export interface SoilStatusInfo {
   label: string;
@@ -27,7 +29,7 @@ interface StationGroup {
 
 @Component({
   selector: 'app-spray',
-  imports: [NgClass, FormsModule, Select],
+  imports: [NgClass, JsonPipe, DecimalPipe, FormsModule, Select],
   templateUrl: './spray.html',
   styleUrl: './spray.scss'
 })
@@ -46,10 +48,18 @@ export class Spray implements OnInit {
   loading = true;
   error: string | null = null;
 
+  // agriRisk 風險預測
+  riskPrediction: AgriRiskPredictResponse | null = null;
+  riskLoading = false;
+  riskError: string | null = null;
+
   // 暴露 Math 給模板使用
   Math = Math;
 
-  constructor(private dataService: DataService) { }
+  constructor(
+    private dataService: DataService,
+    private configService: ConfigService
+  ) { }
 
   ngOnInit(): void {
     this.loadWeatherData();
@@ -116,22 +126,42 @@ export class Spray implements OnInit {
    * 將測站按縣市分組
    */
   private groupStationsByCity(stations: AutoWeatherStation[]): StationGroup[] {
-    // 按縣市分組
-    const cityMap = new Map<string, StationOption[]>();
+    // 步驟 1：根據 Station_ID 去重（保留每個測站的唯一記錄）
+    const uniqueStationsMap = new Map<string, AutoWeatherStation>();
 
     stations.forEach(station => {
-      const city = station.CITY;
+      // 過濾無效資料：必須有測站 ID 和縣市名稱
+      if (!station.Station_ID || !station.CITY) {
+        console.warn('跳過無效測站資料:', station);
+        return;
+      }
+
+      const existingStation = uniqueStationsMap.get(station.Station_ID);
+
+      // 如果測站不存在，或新資料時間較晚，則更新
+      if (!existingStation || station.TIME > existingStation.TIME) {
+        uniqueStationsMap.set(station.Station_ID, station);
+      }
+    });
+
+    // 步驟 2：將去重後的測站按縣市分組
+    const cityMap = new Map<string, StationOption[]>();
+
+    uniqueStationsMap.forEach(station => {
+      // 清理縣市名稱（移除前後空白）
+      const city = station.CITY.trim();
+
       if (!cityMap.has(city)) {
         cityMap.set(city, []);
       }
       cityMap.get(city)!.push({
         Station_ID: station.Station_ID,
-        Station_name: station.Station_name,
-        CITY: station.CITY
+        Station_name: station.Station_name.trim(),
+        CITY: city
       });
     });
 
-    // 轉換為 StationGroup 陣列並排序
+    // 步驟 3：轉換為 StationGroup 陣列並排序
     const groups: StationGroup[] = [];
     cityMap.forEach((items, city) => {
       groups.push({
@@ -140,7 +170,7 @@ export class Spray implements OnInit {
       });
     });
 
-    // 按縣市名稱排序
+    // 步驟 4：按縣市名稱排序
     return groups.sort((a, b) => a.label.localeCompare(b.label, 'zh-TW'));
   }
 
@@ -289,4 +319,8 @@ export class Spray implements OnInit {
     if (rain >= 1) return 'bg-info-300';
     return 'bg-surface-300';
   }
+
+  // ── GCP Vertex AI agriRisk 風險預測 ──
+
+
 }

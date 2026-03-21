@@ -10,6 +10,12 @@
 interface ApiConfig {
   moa: string;
   dataGov: string;
+  vertexAI: {
+    projectId: string;
+    location: string;
+    endpointId: string;
+    baseUrl: string;
+  };
 }
 
 /**
@@ -20,7 +26,13 @@ export function getApiConfig(): ApiConfig {
   // 生產環境：直接使用完整 URL
   return {
     moa: 'https://data.moa.gov.tw/api/v1',
-    dataGov: 'https://data.gov.tw'
+    dataGov: 'https://data.gov.tw',
+    vertexAI: {
+      projectId: '342016522608',
+      location: 'asia-east1',
+      endpointId: '5505740704413908992',
+      baseUrl: 'https://asia-east1-aiplatform.googleapis.com/v1'
+    }
   };
 }
 

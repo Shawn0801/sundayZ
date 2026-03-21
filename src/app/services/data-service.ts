@@ -1,10 +1,16 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { PesticideType, WeatherInfo } from '../interfaces/PesticideTypeRes';
 import { AgriProductsTransTypeRes } from '../interfaces/AgriProductsTransTypeRes';
 import { AutoWeatherStation, AutoWeatherStationRes } from '../interfaces/AutoWeatherStationRes';
 import { PlantEpidemicTypeRes } from '../interfaces/PlantEpidemicTypeRes';
 import { JournalEntry, JournalType } from '../interfaces/JournalEntry';
+import {
+  AgriRiskPredictRequest,
+  AgriRiskPredictResponse,
+  AgriRiskFeature
+} from '../interfaces/AgriRiskRes';
 import { API_CONFIG } from '../config/api.config';
 
 @Injectable({
@@ -325,6 +331,122 @@ export class DataService {
       console.error('刪除日誌失敗:', error);
       return false;
     }
+  }
+
+  // ─────────────────────────────────────────
+  // GCP Vertex AI - agriRisk 農業風險預測
+  // ─────────────────────────────────────────
+
+  /**
+   * 呼叫 GCP Vertex AI agriRisk 模型進行農業風險預測
+   *
+   * @param features 預測特徵資料（根據你的模型欄位調整）
+   * @param accessToken GCP OAuth 2.0 Access Token (使用 gcloud auth print-access-token 取得)
+   * @returns Observable<AgriRiskPredictResponse>
+   *
+   * 使用範例：
+   * ```typescript
+   * const features: AgriRiskFeature = {
+   *   agriRisk: 'your_value'  // 根據模型實際欄位調整
+   * };
+   * this.dataService.predictAgriRisk(features, accessToken).subscribe({
+   *   next: (result) => console.log('預測結果:', result.predictions),
+   *   error: (error) => console.error('預測失敗:', error)
+   * });
+   * ```
+   */
+  predictAgriRisk(
+    features: AgriRiskFeature | AgriRiskFeature[],
+    accessToken: string
+  ): Observable<AgriRiskPredictResponse> {
+    const url = this.getAgriRiskEndpointUrl();
+
+    // 確保 features 是陣列格式
+    const instances = Array.isArray(features) ? features : [features];
+
+    const payload: AgriRiskPredictRequest = { instances };
+
+    // 設定 HTTP Headers（需要 GCP Access Token）
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.post<AgriRiskPredictResponse>(url, payload, { headers });
+  }
+
+  /**
+   * 根據當前測站氣象資料建立 agriRisk 預測特徵
+   *
+   * 模型用途：預測農產品平均價格 (avg_price)
+   * 需要提供：交易資料（10個欄位）+ 氣象資料（7個欄位）
+   *
+   * @param station 氣象測站資料
+   * @param cropName 作物名稱（選填，預設為「青江菜」）
+   * @param cropCode 作物代碼（選填，預設為「L01」）
+   * @param marketName 市場名稱（選填，預設為「台北市場」）
+   * @param historicalPrice 歷史價格資料（選填，用於提供更準確的價格預測）
+   * @returns AgriRiskFeature
+   */
+  buildAgriRiskFeatures(
+    station: AutoWeatherStation,
+    cropName: string = '青江菜',
+    cropCode: string = 'L01',
+    marketName: string = '台北市場',
+    historicalPrice?: { upper: number; middle: number; lower: number; quantity: number }
+  ): AgriRiskFeature {
+    const today = new Date();
+
+    // 轉換為民國年格式 (115.02.16)
+    const rocYear = today.getFullYear() - 1911;
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const trans_date = `${rocYear}.${month}.${day}`;
+
+    // 西元年格式 (2026-02-16)
+    const trans_date_parsed = this.formatDate(today);
+
+    // 使用歷史價格資料或預設值
+    const priceData = historicalPrice || {
+      upper: 60,
+      middle: 45,
+      lower: 30,
+      quantity: 150
+    };
+
+    // 交易資料欄位
+    return {
+      // === 交易相關欄位 ===
+      trans_date: trans_date,                    // 民國年格式
+      trans_date_parsed: trans_date_parsed,      // 西元年格式
+      crop_name: cropName,                       // 作物名稱
+      crop_code: cropCode,                       // 作物代碼
+      tc_type: 'N04',                            // 交易類型
+      market_name: marketName,                   // 市場名稱
+      upper_price: priceData.upper,              // 上價
+      middle_price: priceData.middle,            // 中價
+      lower_price: priceData.lower,              // 下價
+      trans_quantity: priceData.quantity,        // 交易數量
+
+      // === 氣象相關欄位 ===
+      city: station.CITY,                        // 城市
+      avg_temp: station.TEMP,                    // 平均溫度
+      avg_humd: station.HUMD * 100,              // 平均濕度（轉為百分比）
+      avg_pres: station.PRES,                    // 平均氣壓
+      avg_wdsd: station.WDSD,                    // 平均風速
+      max_h_24r: station.H_24R,                  // 24小時最大雨量
+      avg_rain: station.H_24R,                   // 平均雨量（使用24h雨量）
+      max_hour_24: 1,                            // 24小時最大值（預設）
+      max_daily_rain: station.H_24R              // 每日最大雨量
+    };
+  }
+
+  /**
+   * 建立完整的 Vertex AI Endpoint URL
+   */
+  private getAgriRiskEndpointUrl(): string {
+    const { baseUrl, projectId, location, endpointId } = API_CONFIG.vertexAI;
+    return `${baseUrl}/projects/${projectId}/locations/${location}/endpoints/${endpointId}:predict`;
   }
 
 }

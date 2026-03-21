@@ -2,17 +2,17 @@
 
   <!-- 載入中狀態 -->
   @if (loading) {
-    <div class="flex flex-col items-center justify-center py-8">
-      <div class="w-8 h-8 border-4 border-primary-200 border-t-primary rounded-full animate-spin"></div>
-      <p class="text-xs text-surface-500 mt-2">載入中...</p>
-    </div>
+  <div class="flex flex-col items-center justify-center py-8">
+    <div class="w-8 h-8 border-4 border-primary-200 border-t-primary rounded-full animate-spin"></div>
+    <p class="text-xs text-surface-500 mt-2">載入中...</p>
+  </div>
   }
 
   <!-- 錯誤訊息 -->
   @if (error && !loading) {
-    <div class="bg-danger-50 border-l-4 border-danger-500 rounded-lg p-3 text-center">
-      <p class="text-xs text-danger-700">{{ error }}</p>
-    </div>
+  <div class="bg-danger-50 border-l-4 border-danger-500 rounded-lg p-3 text-center">
+    <p class="text-xs text-danger-700">{{ error }}</p>
+  </div>
   }
 
   <!-- 主要內容 -->
@@ -57,29 +57,35 @@
 
     <!-- 測站選單（按縣市分組） -->
     <div class="mb-3">
-      <p-select
-        [(ngModel)]="selectedStationId"
-        [options]="stationGroups"
-        [group]="true"
-        optionLabel="Station_name"
-        optionValue="Station_ID"
-        (onChange)="onStationChange($event.value)"
-        [filter]="true"
-        filterPlaceholder="搜尋測站..."
-        placeholder="請選擇測站"
-        class="w-full"
-      >
+      <p-select [(ngModel)]="selectedStationId" [options]="stationGroups" [group]="true" optionLabel="Station_name"
+        optionValue="Station_ID" (onChange)="onStationChange($event.value)" [filter]="true" filterPlaceholder="搜尋測站..."
+        placeholder="請選擇測站" class="w-full">
+        <!-- 縣市分組標題樣式 -->
         <ng-template pTemplate="group" let-group>
-          <div class="flex items-center gap-2 font-semibold text-primary">
-            <i class="pi pi-map text-xs"></i>
-            <span class="text-xs">{{ group.label }}</span>
+          <div class="flex items-center gap-2 py-2 px-3 bg-primary-50 border-l-4 border-primary-500">
+            <i class="pi pi-map text-primary-600 text-sm"></i>
+            <span class="text-sm font-bold text-primary-700">{{ group.label }}</span>
           </div>
         </ng-template>
+
+        <!-- 測站項目樣式（縮排顯示層級） -->
         <ng-template pTemplate="item" let-option>
-          <div class="flex items-center gap-2 pl-4">
-            <i class="pi pi-map-marker text-secondary text-xs"></i>
-            <span class="text-xs">{{ option.Station_name }}</span>
+          <div class="flex items-center gap-2 py-2 px-3 pl-8 hover:bg-beige-50 transition-colors">
+            <i class="pi pi-map-marker text-secondary-500 text-xs"></i>
+            <span class="text-sm text-surface-700">{{ option.Station_name }}</span>
+            <span class="text-xs text-surface-400 ml-auto">{{ option.CITY }}</span>
           </div>
+        </ng-template>
+
+        <!-- 已選擇項目的顯示樣式 -->
+        <ng-template pTemplate="selectedItem" let-option>
+          @if (option) {
+          <div class="flex items-center gap-2">
+            <i class="pi pi-map-marker text-primary text-xs"></i>
+            <span class="text-sm font-medium">{{ option.Station_name }}</span>
+            <span class="text-xs text-surface-500">({{ option.CITY }})</span>
+          </div>
+          }
         </ng-template>
       </p-select>
     </div>
@@ -95,10 +101,8 @@
         <div class="flex items-center gap-2">
           <i class="pi pi-sun text-warning-500 text-sm"></i>
           <div class="flex-1 h-2 bg-surface-200 rounded-full overflow-hidden">
-            <div
-              class="h-full rounded-full transition-all duration-500"
-              [style.width.%]="temperature > 0 ? (temperature / 45 * 100) : 0"
-              [ngClass]="{
+            <div class="h-full rounded-full transition-all duration-500"
+              [style.width.%]="temperature > 0 ? (temperature / 45 * 100) : 0" [ngClass]="{
                 'bg-danger-500': temperature >= 35,
                 'bg-warning-500': temperature >= 28 && temperature < 35,
                 'bg-success-500': temperature >= 18 && temperature < 28,
@@ -120,9 +124,7 @@
         <div class="flex items-center gap-2">
           <i class="pi pi-cloud text-info-500 text-sm"></i>
           <div class="flex-1 h-2 bg-surface-200 rounded-full overflow-hidden">
-            <div
-              class="h-full bg-info-400 rounded-full transition-all duration-500"
-              [style.width.%]="humidity">
+            <div class="h-full bg-info-400 rounded-full transition-all duration-500" [style.width.%]="humidity">
             </div>
           </div>
           <span class="text-xs text-surface-400 w-10">100%</span>
@@ -138,9 +140,7 @@
         <div class="flex items-center gap-2">
           <i class="pi pi-bolt text-info-500 text-sm"></i>
           <div class="flex-1 h-2 bg-surface-200 rounded-full overflow-hidden">
-            <div
-              class="h-full rounded-full transition-all duration-500"
-              [ngClass]="rainfallColor"
+            <div class="h-full rounded-full transition-all duration-500" [ngClass]="rainfallColor"
               [style.width.%]="rainfall > 0 ? Math.min((rainfall / 100 * 100), 100) : 0">
             </div>
           </div>
@@ -149,6 +149,10 @@
       </div>
     </div>
   </div>
+
+  <div class="border-t border-surface-200"></div>
+
+
 
   }
 </div>
