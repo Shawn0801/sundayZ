@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 // 自訂 MenuItem 介面
 interface MenuItem {
   label: string;
+  shortLabel?: string; // 手機底部導航簡短標籤
   icon: string;
   routerLink: string;
 }
@@ -34,10 +35,10 @@ export class Menu implements OnInit {
 
   ngOnInit(): void {
     this.items.set([
-      { label: '首頁儀表板', icon: 'pi pi-home', routerLink: '/dashboard' },
-      { label: '交易行情', icon: 'pi pi-chart-line', routerLink: '/market' },
-      { label: '田間日誌', icon: 'pi pi-book', routerLink: '/journal' },
-      { label: '偵測蟲害助手', icon: 'pi pi-bolt', routerLink: '/insectDamge' },
+      { label: '首頁儀表板', shortLabel: '首頁', icon: 'pi pi-home', routerLink: '/dashboard' },
+      { label: '交易行情', shortLabel: '行情', icon: 'pi pi-chart-line', routerLink: '/market' },
+      { label: '田間日誌', shortLabel: '日誌', icon: 'pi pi-book', routerLink: '/journal' },
+      { label: '偵測蟲害助手', shortLabel: '蟲害', icon: 'pi pi-bolt', routerLink: '/insectDamge' },
     ]);
   }
 

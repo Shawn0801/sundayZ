@@ -29,11 +29,11 @@
 
   <div class="border-t border-surface-200"></div>
 
-  <!-- 農務日曆與紀錄 -->
-  <div class="flex gap-4">
+  <!-- 農務日曆與紀錄 (Mobile-First: 手機垂直排列) -->
+  <div class="flex flex-col md:flex-row gap-4">
     <!-- 農務日曆 (左側) -->
     <div class="flex-1">
-      <h3 class="text-sm font-semibold text-primary mb-0.5">農務日曆</h3>
+      <h3 class="text-sm md:text-base font-semibold text-primary mb-0.5">農務日曆</h3>
       <p class="text-xs text-surface-400 mb-3">點選日期查看紀錄</p>
 
       <p-datepicker [(ngModel)]="selectedDate" (onSelect)="onDateSelect()" [inline]="true" dateFormat="yy/mm/dd"
@@ -42,7 +42,7 @@
 
     <!-- 選定日期的紀錄 (右側) -->
     <div class="flex-1">
-      <h3 class="text-sm font-semibold text-primary mb-0.5">
+      <h3 class="text-sm md:text-base font-semibold text-primary mb-0.5">
         {{ selectedDate | date:'M/d' }} 的紀錄
       </h3>
       <p class="text-xs text-surface-400 mb-3">共 {{ entriesForSelectedDate.length }} 筆</p>
@@ -86,34 +86,34 @@
 
   <div class="border-t border-surface-200"></div>
 
-  <!-- 快速操作 -->
+  <!-- 快速操作 (Mobile-First: 觸控友善按鈕) -->
   <div>
-    <h3 class="text-sm font-semibold text-primary mb-0.5">快速紀錄</h3>
+    <h3 class="text-sm md:text-base font-semibold text-primary mb-0.5">快速紀錄</h3>
     <p class="text-xs text-surface-400 mb-3">一鍵新增農務作業</p>
 
-    <div class="grid grid-cols-2 gap-2">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
       <button (click)="onQuickActionPesticide()"
-        class="flex flex-col items-center justify-center gap-1 py-2.5 px-2 bg-beige-50 border border-danger-200 text-danger-600 rounded-lg hover:bg-danger-50 hover:border-danger-300 transition-all active:scale-95">
-        <i class="pi pi-shield text-lg"></i>
-        <span class="text-xs font-medium">噴藥</span>
+        class="flex flex-col items-center justify-center gap-1 h-20 md:h-24 px-2 bg-beige-50 border border-danger-200 text-danger-600 rounded-lg hover:bg-danger-50 hover:border-danger-300 transition-all active:scale-95">
+        <i class="pi pi-shield text-xl md:text-2xl"></i>
+        <span class="text-xs md:text-sm font-medium">噴藥</span>
       </button>
 
       <button (click)="onQuickActionFertilizer()"
-        class="flex flex-col items-center justify-center gap-1 py-2.5 px-2 bg-beige-50 border border-primary-200 text-primary-600 rounded-lg hover:bg-primary-50 hover:border-primary-300 transition-all active:scale-95">
-        <i class="pi pi-seedling text-lg"></i>
-        <span class="text-xs font-medium">施肥</span>
+        class="flex flex-col items-center justify-center gap-1 h-20 md:h-24 px-2 bg-beige-50 border border-primary-200 text-primary-600 rounded-lg hover:bg-primary-50 hover:border-primary-300 transition-all active:scale-95">
+        <i class="pi pi-seedling text-xl md:text-2xl"></i>
+        <span class="text-xs md:text-sm font-medium">施肥</span>
       </button>
 
       <button (click)="onQuickActionHarvest()"
-        class="flex flex-col items-center justify-center gap-1 py-2.5 px-2 bg-beige-50 border border-accent-300 text-accent-700 rounded-lg hover:bg-accent-50 hover:border-accent-400 transition-all active:scale-95">
-        <i class="pi pi-shopping-bag text-lg"></i>
-        <span class="text-xs font-medium">採收</span>
+        class="flex flex-col items-center justify-center gap-1 h-20 md:h-24 px-2 bg-beige-50 border border-accent-300 text-accent-700 rounded-lg hover:bg-accent-50 hover:border-accent-400 transition-all active:scale-95">
+        <i class="pi pi-shopping-bag text-xl md:text-2xl"></i>
+        <span class="text-xs md:text-sm font-medium">採收</span>
       </button>
 
       <button (click)="onQuickActionObservation()"
-        class="flex flex-col items-center justify-center gap-1 py-2.5 px-2 bg-beige-50 border border-secondary-300 text-secondary-700 rounded-lg hover:bg-secondary-50 hover:border-secondary-400 transition-all active:scale-95">
-        <i class="pi pi-eye text-lg"></i>
-        <span class="text-xs font-medium">筆記</span>
+        class="flex flex-col items-center justify-center gap-1 h-20 md:h-24 px-2 bg-beige-50 border border-secondary-300 text-secondary-700 rounded-lg hover:bg-secondary-50 hover:border-secondary-400 transition-all active:scale-95">
+        <i class="pi pi-eye text-xl md:text-2xl"></i>
+        <span class="text-xs md:text-sm font-medium">筆記</span>
       </button>
     </div>
   </div>

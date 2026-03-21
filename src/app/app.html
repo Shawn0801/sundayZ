@@ -1,7 +1,12 @@
-<!-- 左側選單 (固定左側) -->
+<!-- 選單 (Desktop: 側邊欄, Mobile: 底部導航) -->
 <app-menu></app-menu>
 
-<!-- 右側主要內容區 (使用 router-outlet 動態切換頁面) -->
-<main [style.margin-left]="mainMarginLeft()" style="min-height: 100vh; background: #FCFAF8; padding: 24px; transition: margin-left 300ms ease-in-out;">
+<!-- 主要內容區 (Mobile-First: 響應式邊距) -->
+<main
+  [ngClass]="{
+    'md:ml-20': isCollapsed(),
+    'md:ml-64': !isCollapsed()
+  }"
+  class="min-h-screen bg-beige-100 p-4 md:p-6 pb-20 md:pb-6 transition-all duration-300">
   <router-outlet></router-outlet>
 </main>

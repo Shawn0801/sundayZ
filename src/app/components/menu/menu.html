@@ -1,5 +1,6 @@
+<!-- Desktop: 側邊欄 (hidden on mobile, visible on md+) -->
 <aside [class]="isCollapsed() ? 'w-20' : 'w-64'"
-  class="h-screen bg-white fixed left-0 top-0 z-50 border-r border-beige-200 flex flex-col shadow-lg transition-all duration-300">
+  class="hidden md:flex h-screen bg-white fixed left-0 top-0 z-50 border-r border-beige-200 flex-col shadow-lg transition-all duration-300">
   <!-- Logo 區塊 -->
   <div class="flex items-center p-6 border-b border-beige-200 relative">
     <div
@@ -85,3 +86,16 @@
     }
   </div>
 </aside>
+
+<!-- Mobile: 底部導航列 (visible on mobile only, hidden on md+) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t-2 border-beige-200 shadow-lg safe-area-bottom">
+  <div class="grid grid-cols-4 h-16">
+    @for (item of items(); track item.routerLink) {
+    <a [routerLink]="item.routerLink" routerLinkActive="active-bottom-nav"
+      class="flex flex-col items-center justify-center gap-1 text-surface-600 no-underline transition-colors active:bg-primary-50">
+      <i [class]="item.icon" class="text-xl"></i>
+      <span class="text-xs font-medium">{{ item.shortLabel || item.label }}</span>
+    </a>
+    }
+  </div>
+</nav>

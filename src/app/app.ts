@@ -1,4 +1,5 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 import { Menu } from './components/menu/menu';
@@ -8,6 +9,7 @@ import { MenuStateService } from './services/menu-state.service';
   selector: 'app-root',
   standalone: true,
   imports: [
+    CommonModule,
     RouterModule,
     Menu,
   ],
@@ -19,8 +21,6 @@ export class App {
 
   private menuStateService = inject(MenuStateService);
 
-  // 根據選單狀態計算主要內容區的左邊距
-  mainMarginLeft = computed(() => {
-    return this.menuStateService.isCollapsed() ? '80px' : '256px';
-  });
+  // 暴露選單收合狀態給模板
+  isCollapsed = this.menuStateService.isCollapsed;
 }

@@ -46,3 +46,32 @@
       transform: scale(0.98);
     }
   }
+
+  // ========================================
+  // Mobile 底部導航列樣式 (Mobile-First)
+  // ========================================
+
+  // 底部安全區域 (for iPhone notch)
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  // 啟用狀態 (底部導航)
+  .active-bottom-nav {
+    color: #2D5A27 !important; // primary-600
+    background: #F3F5F0; // primary-50
+
+    i {
+      color: #2D5A27 !important;
+    }
+
+    span {
+      font-weight: 600;
+    }
+  }
+
+  // 觸控回饋 (底部導航)
+  .active-bottom-nav:active {
+    background: #E8F2E6 !important; // primary-100
+    transform: scale(0.95);
+  }

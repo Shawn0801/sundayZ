@@ -1,7 +1,7 @@
-<div class="p-6">
+<div class="p-4 md:p-6">
   <div class="max-w-8xl mx-auto">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-3xl font-bold text-primary">首頁儀表板</h1>
+    <div class="flex items-center justify-between mb-4 md:mb-6">
+      <h1 class="text-2xl md:text-3xl font-bold text-primary">首頁儀表板</h1>
 
       <!-- 彈窗測試按鈕 -->
       <!-- <div class="flex gap-3">
@@ -21,37 +21,37 @@
     </div>
 
     <!-- 跑馬燈 - 佔滿整行 (col-12) -->
-    <div class="mb-6">
+    <div class="mb-4 md:mb-6">
       <app-marquee></app-marquee>
     </div>
 
-    <!-- Bento Box 網格佈局 -->
-    <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
-      <!-- 左側: WeatherMain (天氣資訊) - 佔 2 欄 (40%) -->
+    <!-- Bento Box 網格佈局 (Mobile-First) -->
+    <div class="grid grid-cols-1 md:grid-cols-6 gap-3 md:gap-4">
+      <!-- 天氣資訊 (Mobile: 全寬, Desktop: 3/6欄) -->
       <div
-        class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-primary-50 md:col-span-3  max-h-[50vh] flex flex-col overflow-hidden">
-        <div class="flex items-center mb-4 flex-shrink-0">
-          <i class="pi pi-sun text-2xl text-primary mr-3"></i>
-          <h2 class="text-xl font-semibold text-primary">天氣資訊</h2>
+        class="bg-white rounded-xl p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-primary-50 md:col-span-3 max-h-[40vh] md:max-h-[50vh] flex flex-col overflow-hidden">
+        <div class="flex items-center mb-3 md:mb-4 flex-shrink-0">
+          <i class="pi pi-sun text-xl md:text-2xl text-primary mr-2 md:mr-3"></i>
+          <h2 class="text-lg md:text-xl font-semibold text-primary">天氣資訊</h2>
         </div>
         <div class="flex-1 overflow-y-auto">
           <taiwan-map></taiwan-map>
         </div>
       </div>
 
-      <!-- 右上: Market (市場情報) - 佔 3 欄 (60%) -->
+      <!-- 市場情報 (Mobile: 全寬, Desktop: 3/6欄) -->
       <div
-        class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-primary-50 md:col-span-3 max-h-[50vh] flex flex-col overflow-hidden">
-        <div class="flex items-center justify-between mb-4 flex-shrink-0">
+        class="bg-white rounded-xl p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-primary-50 md:col-span-3 max-h-[40vh] md:max-h-[50vh] flex flex-col overflow-hidden">
+        <div class="flex items-center justify-between mb-3 md:mb-4 flex-shrink-0">
           <div class="flex items-center">
-            <i class="pi pi-chart-line text-2xl text-primary mr-3"></i>
-            <h2 class="text-xl font-semibold text-primary">市場情報</h2>
+            <i class="pi pi-chart-line text-xl md:text-2xl text-primary mr-2 md:mr-3"></i>
+            <h2 class="text-lg md:text-xl font-semibold text-primary">市場情報</h2>
           </div>
           <button
-            class="text-primary hover:text-primary-600 transition-colors flex items-center gap-1 text-sm font-medium"
+            class="text-primary hover:text-primary-600 transition-colors flex items-center gap-1 text-xs md:text-sm font-medium h-10 px-3"
             routerLink="/market">
             <span>查看更多</span>
-            <i class="pi pi-angle-right text-lg"></i>
+            <i class="pi pi-angle-right text-base md:text-lg"></i>
           </button>
         </div>
         <div class="flex-1 overflow-y-auto">
@@ -59,24 +59,24 @@
         </div>
       </div>
 
-      <!-- 右下左: Spray (土壤濕度) - 佔 4 欄 (80%) -->
+      <!-- 土壤濕度 (Mobile: 全寬, Desktop: 2/6欄) -->
       <div
-        class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-primary-50 md:col-span-2 flex flex-col">
-        <div class="flex items-center mb-4 flex-shrink-0">
-          <i class="pi pi-shield text-2xl text-primary mr-3"></i>
-          <h2 class="text-xl font-semibold text-primary">土壤濕度</h2>
+        class="bg-white rounded-xl p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-primary-50 md:col-span-2 flex flex-col min-h-[300px]">
+        <div class="flex items-center mb-3 md:mb-4 flex-shrink-0">
+          <i class="pi pi-shield text-xl md:text-2xl text-primary mr-2 md:mr-3"></i>
+          <h2 class="text-lg md:text-xl font-semibold text-primary">土壤濕度</h2>
         </div>
         <div class="flex-1 overflow-y-auto">
           <app-spray></app-spray>
         </div>
       </div>
 
-      <!-- 右下右: Journal (耕作日誌) - 佔 1 欄 (20%) -->
+      <!-- 耕作日誌 (Mobile: 全寬, Desktop: 4/6欄) -->
       <div
-        class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-primary-50 md:col-span-4 flex flex-col">
-        <div class="flex items-center mb-4 flex-shrink-0">
-          <i class="pi pi-book text-2xl text-primary mr-3"></i>
-          <h2 class="text-xl font-semibold text-primary">耕作日誌</h2>
+        class="bg-white rounded-xl p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-primary-50 md:col-span-4 flex flex-col min-h-[300px]">
+        <div class="flex items-center mb-3 md:mb-4 flex-shrink-0">
+          <i class="pi pi-book text-xl md:text-2xl text-primary mr-2 md:mr-3"></i>
+          <h2 class="text-lg md:text-xl font-semibold text-primary">耕作日誌</h2>
         </div>
         <div class="flex-1 overflow-y-auto">
           <app-journal></app-journal>
