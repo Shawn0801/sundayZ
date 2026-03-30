@@ -4,6 +4,7 @@ import { ErrorDialogComponent, ErrorDialogData } from '../core/dialog/error-dial
 import { SuccessDialogComponent, SuccessDialogData } from '../core/dialog/success-dialog/success-dialog.component';
 import { JournalEditDialogComponent, JournalEditDialogData } from '../core/dialog/journal-edit-dialog/journal-edit-dialog.component';
 import { CountyInfoDialogComponent, CountyInfoDialogData } from '../core/dialog/county-info-dialog/county-info-dialog.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../core/dialog/confirm-dialog/confirm-dialog.component';
 
 /**
  * 共用彈窗服務
@@ -216,6 +217,33 @@ export class DialogService {
       breakpoints: {
         '960px': '85vw',
         '640px': '95vw'
+      }
+    });
+  }
+  /**
+   * 顯示確認彈窗
+   * @param message 確認訊息
+   * @param title 標題（選用，預設：確認操作）
+   * @returns DynamicDialogRef
+   */
+  showConfirm(message: string, title?: string) {
+    const data: ConfirmDialogData = {
+      message,
+      title
+    };
+
+    return this.primeDialogService.open(ConfirmDialogComponent, {
+      data,
+      header: ' ', // 空白標題
+      modal: true,
+      dismissableMask: false,
+      closable: false,
+      styleClass: 'dialog-custom confirm-dialog-wrapper',
+      baseZIndex: 11000, // 高於一般彈窗
+      width: 'auto',
+      breakpoints: {
+        '960px': '80vw',
+        '640px': '90vw'
       }
     });
   }

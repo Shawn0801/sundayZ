@@ -27,7 +27,7 @@ export const JournalTypeLabels: Record<JournalType, string> = {
  */
 export const JournalTypeIcons: Record<JournalType, string> = {
   [JournalType.PESTICIDE]: 'pi-shield',
-  [JournalType.FERTILIZER]: 'pi-seedling',
+  [JournalType.FERTILIZER]: 'pi-box',
   [JournalType.HARVEST]: 'pi-shopping-bag',
   [JournalType.WEEDING]: 'pi-scissors',
   [JournalType.TILLING]: 'pi-wrench',

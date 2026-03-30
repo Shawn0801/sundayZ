@@ -1,11 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { FirestoreJournalService } from './firestore-journal.service';
+import { AuthService } from './auth.service';
 import { PesticideType, WeatherInfo } from '../interfaces/PesticideTypeRes';
 import { AgriProductsTransTypeRes } from '../interfaces/AgriProductsTransTypeRes';
 import { AutoWeatherStation, AutoWeatherStationRes } from '../interfaces/AutoWeatherStationRes';
 import { PlantEpidemicTypeRes } from '../interfaces/PlantEpidemicTypeRes';
-import { JournalEntry, JournalType } from '../interfaces/JournalEntry';
+import { JournalEntry } from '../interfaces/JournalEntry';
 import {
   AgriRiskPredictRequest,
   AgriRiskPredictResponse,
@@ -17,6 +20,8 @@ import { API_CONFIG } from '../config/api.config';
   providedIn: 'root'
 })
 export class DataService {
+  private firestoreJournal = inject(FirestoreJournalService);
+  private authService = inject(AuthService);
 
   constructor(private http: HttpClient) { }
 
@@ -152,78 +157,8 @@ export class DataService {
   }
 
   // ─────────────────────────────────────────
-  // 農務日誌 Mock 資料
+  // 農務日誌功能（已整合 Firestore）
   // ─────────────────────────────────────────
-
-  /**
-   * 取得 Mock 農務日誌資料
-   * 包含最近的操作紀錄，用於 Dashboard 顯示
-   */
-  getMockJournalEntries(): JournalEntry[] {
-    const now = new Date();
-
-    // 最近一次噴藥（3天前，PHI = 7天，還剩4天可採收）
-    const pesticideDate = new Date(now);
-    pesticideDate.setDate(pesticideDate.getDate() - 3);
-    const pesticideEndDate = new Date(pesticideDate);
-    pesticideEndDate.setDate(pesticideEndDate.getDate() + 7);
-
-    const entries: JournalEntry[] = [
-      {
-        id: 'j001',
-        userId: 'user001',
-        timestamp: pesticideDate,
-        type: JournalType.PESTICIDE,
-        targetCrop: '青江菜',
-        itemName: '益達胺',
-        quantity: 50,
-        unit: 'c.c.',
-        phi_days: 7,
-        phi_end_date: pesticideEndDate,
-        notes: '葉面噴灑，注意稀釋比例 1:1000'
-      },
-      {
-        id: 'j002',
-        userId: 'user001',
-        timestamp: new Date(now.getTime() - 6 * 60 * 60 * 1000), // 6小時前
-        type: JournalType.FERTILIZER,
-        targetCrop: '高麗菜',
-        itemName: '有機液肥',
-        quantity: 2,
-        unit: '包',
-        notes: '追肥，每株約 100g'
-      },
-      {
-        id: 'j003',
-        userId: 'user001',
-        timestamp: new Date(now.getTime() - 2 * 60 * 60 * 1000), // 2小時前
-        type: JournalType.WEEDING,
-        targetCrop: '青江菜',
-        notes: '除草作業，清理畦溝雜草'
-      },
-      {
-        id: 'j004',
-        userId: 'user001',
-        timestamp: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000), // 1天前
-        type: JournalType.HARVEST,
-        targetCrop: '青江菜',
-        quantity: 15,
-        unit: '公斤',
-        notes: '採收第一批成熟葉菜'
-      },
-      {
-        id: 'j005',
-        userId: 'user001',
-        timestamp: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000), // 5天前
-        type: JournalType.OBSERVATION,
-        targetCrop: '高麗菜',
-        notes: '發現少量蚜蟲，持續觀察'
-      }
-    ];
-
-    // 按時間倒序排列（最新的在前）
-    return entries.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-  }
 
   /**
    * 計算自指定日期以來的累積雨量
@@ -245,52 +180,113 @@ export class DataService {
   }
 
   // ─────────────────────────────────────────
-  // 農務日誌儲存功能 (localStorage)
+  // 農務日誌儲存功能 (Firestore)
   // ─────────────────────────────────────────
 
   private readonly STORAGE_KEY = 'journal_entries';
 
   /**
-   * 儲存農務日誌（使用 localStorage 暫存）
+   * 儲存農務日誌（使用 Firestore 雲端儲存）
    * @param entry 日誌條目
-   * @returns 儲存成功與否
-   *
-   * TODO: 未來可改為 Firebase Firestore 或後端 API
+   * @returns Observable<string> 儲存成功後的文件 ID
+   */
+  saveJournalEntry$(entry: JournalEntry): Observable<string> {
+    // 取得當前使用者 ID
+    const currentUser = this.authService.getCurrentUser();
+    const userId = currentUser?.uid || 'anonymous';
+
+    console.log('👤 當前使用者:', currentUser ? currentUser.uid : '未登入');
+    console.log('📝 準備儲存的日誌 (Upsert):', entry.id);
+
+    // 確保 entry 有 userId
+    const entryWithUserId = { ...entry, userId };
+
+    return this.firestoreJournal.addJournalEntry(entryWithUserId);
+  }
+
+  /**
+   * 儲存農務日誌（相容性方法，為了不破壞現有其他元件）
    */
   saveJournalEntry(entry: JournalEntry): boolean {
+    this.saveJournalEntry$(entry).subscribe({
+      next: (id) => console.log('✅ 同步介面存儲完成:', id),
+      error: (err) => {
+        console.error('❌ 同步介面存儲失敗，降級到 localStorage:', err);
+        this.saveToLocalStorage(entry);
+      }
+    });
+    return true;
+  }
+
+  /**
+   * 備援：儲存到 localStorage
+   * @param entry 日誌條目
+   */
+  private saveToLocalStorage(entry: JournalEntry): void {
     try {
-      // 從 localStorage 讀取現有資料
       const existingData = localStorage.getItem(this.STORAGE_KEY);
       const entries: JournalEntry[] = existingData ? JSON.parse(existingData) : [];
-
-      // 檢查是否為更新（ID 已存在）
       const existingIndex = entries.findIndex(e => e.id === entry.id);
 
       if (existingIndex !== -1) {
-        // 更新現有紀錄
         entries[existingIndex] = entry;
-        console.log('更新日誌:', entry.id);
       } else {
-        // 新增紀錄
         entries.push(entry);
-        console.log('新增日誌:', entry.id);
       }
 
-      // 儲存回 localStorage
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(entries));
-
-      return true;
+      console.log('已降級儲存到 localStorage');
     } catch (error) {
-      console.error('儲存日誌失敗:', error);
-      return false;
+      console.error('localStorage 儲存失敗:', error);
     }
   }
 
   /**
-   * 從 localStorage 載入所有日誌
+   * 從 Firestore 載入所有日誌（一次性查詢）
    * @returns JournalEntry 陣列
    */
   loadJournalEntries(): JournalEntry[] {
+    // 注意：這是同步方法，但 Firestore 是非同步的
+    // 建議使用 loadJournalEntries$() 取得 Observable
+    console.warn('loadJournalEntries() 是同步方法，建議使用 loadJournalEntries$()');
+
+    // 從 localStorage 讀取（降級備援）
+    return this.loadFromLocalStorage();
+  }
+
+  /**
+   * 從 Firestore 載入所有日誌（Observable 方式）
+   * 會自動監聽使用者登入狀態變化
+   * @returns Observable<JournalEntry[]>
+   */
+  loadJournalEntries$(): Observable<JournalEntry[]> {
+    // 監聽使用者狀態變化，自動重新載入資料
+    return this.authService.user$.pipe(
+      switchMap(user => {
+        if (!user) {
+          console.warn('⚠️ 使用者未登入，返回空陣列');
+          console.log('💡 請先登入以載入日誌資料');
+          // 返回空陣列的 Observable
+          return new Observable<JournalEntry[]>(observer => {
+            observer.next([]);
+            observer.complete();
+          });
+        }
+
+        console.log('👤 使用者已登入:', user.uid);
+        console.log('📡 開始監聽 Firestore 日誌資料...');
+
+        // 使用者已登入，監聽 Firestore 資料
+        return this.firestoreJournal.watchUserJournalEntries(user.uid);
+      })
+    );
+  }
+
+  /**
+   * 從 localStorage 載入（備援方法）
+   * @returns JournalEntry 陣列
+   */
+  private loadFromLocalStorage(): JournalEntry[] {
     try {
       const data = localStorage.getItem(this.STORAGE_KEY);
 
@@ -312,25 +308,24 @@ export class DataService {
   }
 
   /**
-   * 刪除日誌
+   * 刪除日誌 (Observable 方式)
    * @param id 日誌 ID
-   * @returns 刪除成功與否
+   * @returns Observable<void>
+   */
+  deleteJournalEntry$(id: string): Observable<void> {
+    console.log('🗑️ 開始從 Firestore 刪除紀錄:', id);
+    return this.firestoreJournal.deleteJournalEntry(id);
+  }
+
+  /**
+   * 刪除日誌（相容性方法）
    */
   deleteJournalEntry(id: string): boolean {
-    try {
-      const existingData = localStorage.getItem(this.STORAGE_KEY);
-      const entries: JournalEntry[] = existingData ? JSON.parse(existingData) : [];
-
-      const filteredEntries = entries.filter(e => e.id !== id);
-
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredEntries));
-
-      console.log('刪除日誌:', id);
-      return true;
-    } catch (error) {
-      console.error('刪除日誌失敗:', error);
-      return false;
-    }
+    this.deleteJournalEntry$(id).subscribe({
+      next: () => console.log('✅ 刪除完成'),
+      error: (err) => console.error('❌ 刪除失敗:', err)
+    });
+    return true;
   }
 
   // ─────────────────────────────────────────

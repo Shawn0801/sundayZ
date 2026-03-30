@@ -3,19 +3,22 @@
 
     <!-- 操作類型 -->
     <div class="field">
-      <label for="type" class="block text-sm font-semibold text-primary mb-2">
+      <label class="block text-sm font-semibold text-primary mb-2">
         操作類型 <span class="text-danger-500">*</span>
       </label>
-      <p-select
-        id="type"
-        formControlName="type"
-        [options]="typeOptions"
-        optionLabel="label"
-        optionValue="value"
-        placeholder="請選擇操作類型"
-        class="w-full"
-        [showClear]="false"
-      />
+      <div class="grid grid-cols-3 gap-2">
+        @for (option of typeOptions; track option.value) {
+          <button
+            type="button"
+            (click)="selectType(option.value)"
+            [class]="getTypeButtonClass(option.value)"
+            class="flex flex-col items-center justify-center gap-1 h-20 px-2 rounded-lg transition-all active:scale-95 border-2"
+          >
+            <i class="pi {{ getTypeIcon(option.value) }} text-xl"></i>
+            <span class="text-xs font-medium">{{ option.label }}</span>
+          </button>
+        }
+      </div>
       @if (form.get('type')?.invalid && form.get('type')?.touched) {
         <small class="text-danger-500 text-xs mt-1 block">{{ getErrorMessage('type') }}</small>
       }
@@ -26,11 +29,16 @@
       <label for="targetCrop" class="block text-sm font-semibold text-primary mb-2">
         作物名稱 <span class="text-danger-500">*</span>
       </label>
-      <input
-        pInputText
+      <p-select
         id="targetCrop"
         formControlName="targetCrop"
-        placeholder="例如：青江菜、高麗菜"
+        [options]="cropOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="請選擇作物"
+        [filter]="true"
+        filterPlaceholder="搜尋作物"
+        [editable]="true"
         class="w-full"
       />
       @if (form.get('targetCrop')?.invalid && form.get('targetCrop')?.touched) {
@@ -139,19 +147,32 @@
     </div>
 
     <!-- 操作按鈕 -->
-    <div class="flex justify-end gap-3 pt-4 border-t border-surface-200">
-      <p-button
-        label="取消"
-        severity="secondary"
-        (onClick)="cancel()"
-        class="min-w-24"
-      />
-      <p-button
-        label="儲存"
-        severity="success"
-        (onClick)="save()"
-        class="min-w-24"
-      />
+    <div class="flex justify-between items-center pt-4 border-t border-surface-200">
+      <div>
+        @if (mode === 'edit') {
+          <p-button
+            label="刪除此紀錄"
+            severity="danger"
+            variant="text"
+            icon="pi pi-trash"
+            (onClick)="delete()"
+          />
+        }
+      </div>
+      <div class="flex gap-3">
+        <p-button
+          label="取消"
+          severity="secondary"
+          (onClick)="cancel()"
+          class="min-w-24"
+        />
+        <p-button
+          label="儲存"
+          severity="success"
+          (onClick)="save()"
+          class="min-w-24"
+        />
+      </div>
     </div>
 
   </form>

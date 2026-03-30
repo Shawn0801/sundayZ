@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
@@ -8,10 +8,13 @@ import { InputNumber } from 'primeng/inputnumber';
 import { Textarea } from 'primeng/textarea';
 import { DatePicker } from 'primeng/datepicker';
 import { Button } from 'primeng/button';
+import { DialogService } from '../../../services/dialog.service';
 import {
   JournalEntry,
   JournalType,
-  JournalTypeLabels
+  JournalTypeLabels,
+  JournalTypeIcons,
+  JournalTypeColors
 } from '../../../interfaces/JournalEntry';
 
 export interface JournalEditDialogData {
@@ -39,14 +42,26 @@ interface DropdownOption {
     Button
   ],
   templateUrl: './journal-edit-dialog.component.html',
-  styleUrl: './journal-edit-dialog.component.scss'
+  styleUrl: './journal-edit-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JournalEditDialogComponent implements OnInit {
   form!: FormGroup;
   mode: 'create' | 'edit' = 'create';
+  private dialogService = inject(DialogService);
 
   // 下拉選項
   typeOptions: DropdownOption[] = [];
+  cropOptions: DropdownOption[] = [
+    { label: '青江菜', value: '青江菜' },
+    { label: '高麗菜', value: '高麗菜' },
+    { label: '小白菜', value: '小白菜' },
+    { label: '菠菜', value: '菠菜' },
+    { label: '萵苣', value: '萵苣' },
+    { label: '空心菜', value: '空心菜' },
+    { label: '芥菜', value: '芥菜' },
+    { label: '油菜', value: '油菜' }
+  ];
   unitOptions: DropdownOption[] = [
     { label: 'c.c.', value: 'c.c.' },
     { label: '包', value: '包' },
@@ -184,6 +199,24 @@ export class JournalEditDialogComponent implements OnInit {
   }
 
   /**
+   * 刪除紀錄
+   */
+  delete(): void {
+    if (this.mode === 'edit' && this.config.data?.entry) {
+      const confirmRef = this.dialogService.showConfirm(
+        '確定要刪除這筆紀錄嗎？此動作無法復原。',
+        '確認刪除'
+      );
+
+      confirmRef.onClose.subscribe((confirmed: boolean) => {
+        if (confirmed) {
+          this.ref.close({ delete: true, id: this.config.data?.entry?.id });
+        }
+      });
+    }
+  }
+
+  /**
    * 儲存
    */
   save(): void {
@@ -230,5 +263,71 @@ export class JournalEditDialogComponent implements OnInit {
       return '數值不可小於 0';
     }
     return '';
+  }
+
+  /**
+   * 選擇操作類型
+   */
+  selectType(type: JournalType): void {
+    this.form.patchValue({ type });
+    this.form.get('type')?.markAsTouched();
+  }
+
+  /**
+   * 取得操作類型的 icon
+   */
+  getTypeIcon(type: JournalType): string {
+    return JournalTypeIcons[type] || 'pi-circle';
+  }
+
+  /**
+   * 取得操作類型按鈕的 class
+   */
+  getTypeButtonClass(type: JournalType): string {
+    const selectedType = this.form.get('type')?.value;
+    const isSelected = selectedType === type;
+
+    // 基礎樣式
+    let classes = '';
+
+    // 根據類型設定顏色
+    switch (type) {
+      case JournalType.PESTICIDE:
+        classes = isSelected
+          ? 'bg-danger-100 border-danger-500 text-danger-700'
+          : 'bg-beige-50 border-danger-200 text-danger-600 hover:bg-danger-50 hover:border-danger-300';
+        break;
+      case JournalType.FERTILIZER:
+        classes = isSelected
+          ? 'bg-primary-100 border-primary-500 text-primary-700'
+          : 'bg-beige-50 border-primary-200 text-primary-600 hover:bg-primary-50 hover:border-primary-300';
+        break;
+      case JournalType.HARVEST:
+        classes = isSelected
+          ? 'bg-accent-100 border-accent-500 text-accent-800'
+          : 'bg-beige-50 border-accent-300 text-accent-700 hover:bg-accent-50 hover:border-accent-400';
+        break;
+      case JournalType.OBSERVATION:
+        classes = isSelected
+          ? 'bg-secondary-100 border-secondary-500 text-secondary-800'
+          : 'bg-beige-50 border-secondary-300 text-secondary-700 hover:bg-secondary-50 hover:border-secondary-400';
+        break;
+      case JournalType.WEEDING:
+        classes = isSelected
+          ? 'bg-success-100 border-success-500 text-success-800'
+          : 'bg-beige-50 border-success-300 text-success-700 hover:bg-success-50 hover:border-success-400';
+        break;
+      case JournalType.TILLING:
+        classes = isSelected
+          ? 'bg-surface-200 border-surface-500 text-surface-800'
+          : 'bg-beige-50 border-surface-300 text-surface-700 hover:bg-surface-50 hover:border-surface-400';
+        break;
+      default:
+        classes = isSelected
+          ? 'bg-surface-200 border-surface-500 text-surface-800'
+          : 'bg-beige-50 border-surface-300 text-surface-700 hover:bg-surface-100 hover:border-surface-400';
+    }
+
+    return classes;
   }
 }

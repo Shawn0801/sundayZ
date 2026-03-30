@@ -1,0 +1,30 @@
+<div class="confirm-dialog-container">
+  <!-- 確認圖示 (警告樣式) -->
+  <div class="confirm-icon-wrapper">
+    <div class="confirm-icon">
+      <i class="pi pi-question-circle text-4xl text-warning-500"></i>
+    </div>
+  </div>
+
+  <!-- 標題 -->
+  <h2 class="confirm-title">{{ title }}</h2>
+
+  <!-- 確認訊息 -->
+  <p class="confirm-message">{{ message }}</p>
+
+  <!-- 操作按鈕 -->
+  <div class="confirm-actions flex justify-center gap-4 mt-6">
+    <p-button
+      [label]="cancelLabel"
+      severity="secondary"
+      (onClick)="cancel()"
+      class="min-w-24"
+    />
+    <p-button
+      [label]="confirmLabel"
+      severity="primary"
+      (onClick)="confirm()"
+      class="min-w-24"
+    />
+  </div>
+</div>

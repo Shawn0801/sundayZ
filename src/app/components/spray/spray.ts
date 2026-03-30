@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NgClass, JsonPipe, DecimalPipe } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
 import { DataService } from '../../services/data-service';
@@ -25,11 +25,12 @@ interface StationOption {
 interface StationGroup {
   label: string;  // 縣市名稱
   items: StationOption[];  // 該縣市的測站列表
+  color?: string;  // 群組顏色類別
 }
 
 @Component({
   selector: 'app-spray',
-  imports: [NgClass, JsonPipe, DecimalPipe, FormsModule, Select],
+  imports: [NgClass, FormsModule, Select],
   templateUrl: './spray.html',
   styleUrl: './spray.scss'
 })
@@ -56,10 +57,27 @@ export class Spray implements OnInit {
   // 暴露 Math 給模板使用
   Math = Math;
 
+  // 縣市顏色配置（基於專案配色）
+  readonly cityColors = [
+    { bg: 'bg-primary-50', border: 'border-primary-500', text: 'text-primary-700', icon: 'text-primary-600' },
+    { bg: 'bg-secondary-50', border: 'border-secondary-500', text: 'text-secondary-700', icon: 'text-secondary-600' },
+    { bg: 'bg-accent-50', border: 'border-accent-500', text: 'text-accent-700', icon: 'text-accent-600' },
+    { bg: 'bg-info-50', border: 'border-info-500', text: 'text-info-700', icon: 'text-info-600' },
+    { bg: 'bg-success-50', border: 'border-success-500', text: 'text-success-700', icon: 'text-success-600' },
+    { bg: 'bg-warning-50', border: 'border-warning-500', text: 'text-warning-700', icon: 'text-warning-600' },
+  ];
+
   constructor(
     private dataService: DataService,
     private configService: ConfigService
   ) { }
+
+  /**
+   * 根據索引取得縣市顏色配置
+   */
+  getCityColor(index: number) {
+    return this.cityColors[index % this.cityColors.length];
+  }
 
   ngOnInit(): void {
     this.loadWeatherData();

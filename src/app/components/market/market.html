@@ -53,19 +53,22 @@
         <button [class]="selectedPeriod === 'today'
               ? 'bg-primary text-white shadow-md'
               : 'bg-white text-surface-600 border-2 border-surface-200 hover:border-primary-200'"
-          class="h-12 px-4 md:px-6 rounded-lg font-medium transition-all text-sm md:text-base" (click)="switchPeriod('today')">
+          class="h-12 px-4 md:px-6 rounded-lg font-medium transition-all text-sm md:text-base"
+          (click)="switchPeriod('today')">
           今日
         </button>
         <button [class]="selectedPeriod === 'week'
               ? 'bg-primary text-white shadow-md'
               : 'bg-white text-surface-600 border-2 border-surface-200 hover:border-primary-200'"
-          class="h-12 px-4 md:px-6 rounded-lg font-medium transition-all text-sm md:text-base" (click)="switchPeriod('week')">
+          class="h-12 px-4 md:px-6 rounded-lg font-medium transition-all text-sm md:text-base"
+          (click)="switchPeriod('week')">
           近七日
         </button>
         <button [class]="selectedPeriod === 'month'
               ? 'bg-primary text-white shadow-md'
               : 'bg-white text-surface-600 border-2 border-surface-200 hover:border-primary-200'"
-          class="h-12 px-4 md:px-6 rounded-lg font-medium transition-all text-sm md:text-base" (click)="switchPeriod('month')">
+          class="h-12 px-4 md:px-6 rounded-lg font-medium transition-all text-sm md:text-base"
+          (click)="switchPeriod('month')">
           近三十日
         </button>
       </div>
@@ -80,7 +83,8 @@
       </div>
 
       <!-- AI 價格預測區域 (Mobile-First) -->
-      <div class="bg-gradient-to-r from-primary-50 to-accent-50 rounded-xl p-4 md:p-6 shadow-sm border-2 border-primary-100">
+      <div
+        class="bg-gradient-to-r from-primary-50 to-accent-50 rounded-xl p-4 md:p-6 shadow-sm border-2 border-primary-100">
         <div class="flex items-center gap-3 mb-4">
           <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shrink-0">
             <i class="pi pi-sparkles text-white text-xl"></i>

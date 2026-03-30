@@ -45,4 +45,10 @@ export class WeatherCard {
 - **失敗/警示**: testErrorDialog
 - **失敗配合錯誤代碼**: testErrorWithCode
 
+## 6. 響應式佈局 (Mobile-First)
+- **斷點策略**: 優先採用 Mobile-first。預設樣式為手機版，電腦版使用 `md:` 或 `lg:` 擴張。
+- **Grid 控制**:
+  - 數據卡片: 手機 `grid-cols-1`，電腦 `md:grid-cols-3` 或 `lg:grid-cols-4`
+  - 列表/圖表: 手機橫向溢出 `overflow-x-auto`，電腦固定寬度
+- **觸控優化**: 手機版按鈕高度不得低於 `h-12` (48px)，確保農夫在田間操作時的易用性
 

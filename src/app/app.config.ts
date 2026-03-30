@@ -12,6 +12,7 @@ import { tokenRefreshInterceptor } from './interceptors/token-refresh.intercepto
 import { errorInterceptor } from './interceptors/error.interceptor';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth } from '@angular/fire/auth';
+import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { Environment } from './models/environment.interface';
 
 export function getAppConfig(environment: Environment): ApplicationConfig {
@@ -44,7 +45,8 @@ export function getAppConfig(environment: Environment): ApplicationConfig {
       }),
       DialogService, // PrimeNG DynamicDialog 服務
       provideFirebaseApp(() => initializeApp(environment.firebase)),
-      provideAuth(() => getAuth())
+      provideAuth(() => getAuth()),
+      provideFirestore(() => getFirestore())
     ]
   };
 }

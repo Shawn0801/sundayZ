@@ -1,1 +1,61 @@
-// 所有樣式使用 Tailwind CSS，無需自定義 SCSS
+// 自定義日曆樣式
+:host ::ng-deep .journal-calendar {
+  // 控制日曆整體寬度為 80%
+  width: 80%;
+
+  .p-datepicker {
+    // 移除過多的內邊距
+    padding: 0.5rem;
+    width: 100%;
+  }
+
+  .p-datepicker-calendar {
+    width: 100%;
+
+    td {
+      // 調整日期單元格以容納標記圓點
+      padding: 0.25rem 0.15rem;
+      vertical-align: top;
+      height: auto;
+      text-align: center;
+
+      > span {
+        // 設定固定寬高以達成正圓
+        width: 2.2rem;
+        height: 2.2rem;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s;
+        position: relative;
+        z-index: 1;
+      }
+    }
+
+    // 確保當前日期、選中日期的樣式為正圓形
+    td.p-datepicker-today > span {
+      background-color: var(--p-primary-50) !important;
+      color: var(--p-primary-600) !important;
+      border: 1px solid var(--p-primary-200);
+    }
+
+    td span.p-highlight {
+      background-color: var(--p-primary-500) !important;
+      color: white !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  // 調整標題和按鈕間距
+  .p-datepicker-header {
+    padding: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+}
+
+// 補足圓點樣式微調（如果需要）
+.journal-calendar .w-1\.5 {
+  margin-top: 2px;
+}
