@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
@@ -8,7 +8,6 @@ import { InputNumber } from 'primeng/inputnumber';
 import { Textarea } from 'primeng/textarea';
 import { DatePicker } from 'primeng/datepicker';
 import { Button } from 'primeng/button';
-import { DialogService } from '../../../services/dialog.service';
 import {
   JournalEntry,
   JournalType,
@@ -48,7 +47,6 @@ interface DropdownOption {
 export class JournalEditDialogComponent implements OnInit {
   form!: FormGroup;
   mode: 'create' | 'edit' = 'create';
-  private dialogService = inject(DialogService);
 
   // 下拉選項
   typeOptions: DropdownOption[] = [];
@@ -203,16 +201,9 @@ export class JournalEditDialogComponent implements OnInit {
    */
   delete(): void {
     if (this.mode === 'edit' && this.config.data?.entry) {
-      const confirmRef = this.dialogService.showConfirm(
-        '確定要刪除這筆紀錄嗎？此動作無法復原。',
-        '確認刪除'
-      );
-
-      confirmRef.onClose.subscribe((confirmed: boolean) => {
-        if (confirmed) {
-          this.ref.close({ delete: true, id: this.config.data?.entry?.id });
-        }
-      });
+      if (confirm('確定要刪除這筆紀錄嗎？此動作無法復原。')) {
+        this.ref.close({ delete: true, id: this.config.data.entry.id });
+      }
     }
   }
 

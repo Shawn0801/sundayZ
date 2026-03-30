@@ -46,20 +46,24 @@ export class Journal implements OnInit, OnDestroy {
     this.subscription = this.dataService.loadJournalEntries$().subscribe({
       next: (entries) => {
         this.allEntries = entries;
-        this.cdr.markForCheck(); // 💡 關鍵：由於使用了 OnPush，需手動觸發變更檢測
 
         if (entries.length === 0) {
           console.log('📭 目前沒有日誌資料');
           console.log('💡 請先登入並新增日誌');
         } else {
           console.log('✅ 日誌資料已更新:', entries.length, '筆');
+          console.log('📊 資料預覽:', entries.slice(0, 3).map(e => ({
+            id: e.id,
+            type: e.type,
+            date: this.formatDateString(new Date(e.timestamp))
+          })));
         }
       },
       error: (error) => {
         console.error('❌ 載入日誌失敗:', error);
+        console.error('錯誤詳情:', error.message);
         // 發生錯誤時顯示空陣列
         this.allEntries = [];
-        this.cdr.markForCheck();
       }
     });
   }

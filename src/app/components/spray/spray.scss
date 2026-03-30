@@ -21,39 +21,39 @@
 }
 
 // 水波動畫
+// 核心原理：元素放大到 300%，只有頂端極小的弧線露出，
+// 看起來就像水面在輕輕晃動，而不是橢圓體在旋轉。
 .water-wave {
   position: absolute;
-  width: 160%; // 調整寬度，讓波浪能覆蓋圓形寬度
-  height: 160%; // 設定為與寬度一致，形成圓形波浪
-  bottom: -80%; // 大幅下移，讓波浪的圓弧貼合容器底部
-  left: -30%; // 水平居中
-  border-radius: 40%; // 從 45% 改為 40%，讓波浪更明顯、更胖
-  animation: wave-rotate 12s linear infinite;
-  will-change: transform; // 優化動畫性能
+  width: 300%;
+  height: 300%;
+  top: -260%;    // 只露出底部一小段弧形作為「水面」
+  left: -100%;   // 置中
+  opacity: 0.6;
+  will-change: transform;
 }
 
 .water-wave--front {
-  background: rgba(255, 255, 255, 0.7);
-  animation-duration: 12s;
-  border-radius: 40%; // 前層波浪，圓潤的波峰波谷
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 45% 48% 43% 47%;
+  animation: wave-sway 6s ease-in-out infinite;
   z-index: 2;
 }
 
 .water-wave--back {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 38%; // 從 44% 改為 38%，後層波浪更明顯，產生層次感
-  animation-duration: 15s;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 47% 44% 46% 43%;
+  animation: wave-sway 8s ease-in-out infinite reverse;
   z-index: 1;
 }
 
-// 水波旋轉動畫
-@keyframes wave-rotate {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+// 輕柔擺盪：不做完整旋轉，只做 ±15° 的來回搖擺
+@keyframes wave-sway {
+  0%   { transform: rotate(-8deg)  translate(1%, 0);  }
+  25%  { transform: rotate(4deg)   translate(-1%, 1%); }
+  50%  { transform: rotate(8deg)   translate(0%, 0);   }
+  75%  { transform: rotate(-4deg)  translate(1%, -1%); }
+  100% { transform: rotate(-8deg)  translate(1%, 0);   }
 }
 
 // 百分比數值標籤

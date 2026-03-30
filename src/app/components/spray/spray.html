@@ -57,25 +57,14 @@
 
     <!-- 測站選單（按縣市分組） -->
     <div class="mb-3">
-      <p-select
-        [(ngModel)]="selectedStationId"
-        [options]="stationGroups"
-        [group]="true"
-        optionGroupLabel="label"
-        optionGroupChildren="items"
-        optionLabel="Station_name"
-        optionValue="Station_ID"
-        (onChange)="onStationChange($event.value)"
-        [filter]="true"
-        filterPlaceholder="搜尋測站..."
-        placeholder="請選擇測站"
-        [appendTo]="'body'"
-        class="w-full">
+      <p-select [(ngModel)]="selectedStationId" [options]="stationGroups" [group]="true" optionGroupLabel="label"
+        optionGroupChildren="items" optionLabel="Station_name" optionValue="Station_ID"
+        (onChange)="onStationChange($event.value)" [filter]="true" filterPlaceholder="搜尋測站..." placeholder="請選擇測站"
+        [appendTo]="'body'" class="w-full">
         <!-- 縣市分組標題樣式 -->
         <ng-template pTemplate="group" let-group let-i="index">
           @let colorConfig = getCityColor(i);
-          <div class="flex items-center gap-2 py-2 px-3 border-l-4"
-               [ngClass]="[colorConfig.bg, colorConfig.border]">
+          <div class="flex items-center gap-2 py-2 px-3 border-l-4" [ngClass]="[colorConfig.bg, colorConfig.border]">
             <i class="pi pi-map text-sm" [ngClass]="colorConfig.icon"></i>
             <span class="text-sm font-bold" [ngClass]="colorConfig.text">{{ group.label }}</span>
           </div>
