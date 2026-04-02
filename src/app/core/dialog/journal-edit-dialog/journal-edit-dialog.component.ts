@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { AuthService } from '../../../services/auth.service';
 import { Select } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
@@ -71,7 +72,8 @@ export class JournalEditDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     public ref: DynamicDialogRef,
-    public config: DynamicDialogConfig<JournalEditDialogData>
+    public config: DynamicDialogConfig<JournalEditDialogData>,
+    private authService: AuthService
   ) {
     this.mode = config.data?.mode || 'create';
     this.initTypeOptions();
@@ -217,7 +219,7 @@ export class JournalEditDialogComponent implements OnInit {
       // 建立 JournalEntry 物件
       const entry: Partial<JournalEntry> = {
         id: this.config.data?.entry?.id || `j${Date.now()}`,
-        userId: 'user001', // TODO: 從登入系統取得
+        userId: this.authService.getCurrentUser()?.uid || 'anonymous',
         type: formValue.type,
         targetCrop: formValue.targetCrop,
         itemName: formValue.itemName || undefined,

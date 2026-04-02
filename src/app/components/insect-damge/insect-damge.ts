@@ -1,16 +1,8 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Button } from 'primeng/button';
-
-// ============================================================
-// 🔧 GCP AI 整合點 #1: 匯入必要模組
-// ============================================================
-// ⭐ 推薦方案：Gemini Vision API (取消以下註解)
-// import { inject } from '@angular/core';
-// import { HttpClient } from '@angular/common/http';
-// import { environment } from '../../../environments/environment';
-// import { catchError, map, timeout } from 'rxjs/operators';
-// import { throwError } from 'rxjs';
+import { GeminiVisionService } from '../../services/gemini-vision.service';
+import { DialogService } from '../../services/dialog.service';
 
 /**
  * 分析狀態
@@ -38,65 +30,6 @@ export interface InsectDamageAnalysis {
   timestamp: Date;
 }
 
-// ============================================================
-// 🔧 GCP AI 整合點 #2: API 請求/回應介面
-// ============================================================
-// ⭐ 推薦方案：Gemini Vision API
-// 成本：每月 1000 次分析 ≈ $0.5-1 USD
-// 優點：零訓練成本、快速整合、繁體中文支援
-// ============================================================
-/**
- * Gemini Vision API 請求格式
- */
-// export interface GeminiRequest {
-//   contents: {
-//     parts: {
-//       text?: string;           // Prompt 文字
-//       inline_data?: {          // 圖片資料
-//         mime_type: string;     // 'image/jpeg'
-//         data: string;          // Base64 編碼（不含 data:image/jpeg;base64,）
-//       };
-//     }[];
-//   }[];
-// }
-
-/**
- * Gemini Vision API 回應格式
- */
-// export interface GeminiResponse {
-//   candidates: {
-//     content: {
-//       parts: {
-//         text: string;  // JSON 字串格式的分析結果
-//       }[];
-//     };
-//   }[];
-// }
-
-// ============================================================
-// 替代方案：Vertex AI AutoML Vision
-// 成本：訓練 $3.465/小時 + 部署 $936/月
-// 優點：客製化模型、高準確度（95%+）
-// 缺點：需要 1000+ 張標註圖片、開發時間長
-// ============================================================
-/**
- * AutoML Vision 請求格式
- */
-// export interface AutoMLRequest {
-//   image: string;      // Base64 編碼的圖片
-//   timestamp: string;  // ISO 8601 格式時間戳記
-// }
-
-/**
- * AutoML Vision 回應格式
- */
-// export interface AutoMLResponse {
-//   type: string;                           // 蟲害種類
-//   severity: 'low' | 'medium' | 'high';   // 嚴重程度
-//   confidence: number;                     // 信心指數 (0-100)
-//   recommendations: string[];              // 防治建議列表
-// }
-
 /**
  * 歷史紀錄
  */
@@ -112,25 +45,13 @@ export interface InsectHistoryRecord {
   standalone: true,
   imports: [CommonModule, Button],
   templateUrl: './insect-damge.html',
-  styleUrl: './insect-damge.scss'
+  styleUrl: './insect-damge.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InsectDamge {
-  // ============================================================
-  // 🔧 GCP AI 整合點 #3: 注入 HttpClient
-  // ============================================================
-  // private http = inject(HttpClient);
-
-  // ============================================================
-  // 🔧 GCP AI 整合點 #4: 設定 API 端點
-  // ============================================================
-  // ⭐ Gemini Vision API (推薦)
-  // Step 1: 取得 API Key: https://makersuite.google.com/app/apikey
-  // Step 2: 設定 environment.ts: geminiApiKey = 'YOUR_API_KEY'
-  // Step 3: 取消以下註解
-  // private readonly GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${environment.geminiModel}:generateContent?key=${environment.geminiApiKey}`;
-  //
-  // 替代方案：AutoML Vision (需要訓練)
-  // private readonly AUTOML_API_URL = 'https://your-cloud-run-url.run.app/api/analyze-insect';
+  private geminiVision = inject(GeminiVisionService);
+  private dialogService = inject(DialogService);
+  private cdr = inject(ChangeDetectorRef);
 
   // 暴露 enum 給模板使用
   AnalysisState = AnalysisState;
@@ -215,7 +136,7 @@ export class InsectDamge {
     const reader = new FileReader();
     reader.onload = (e) => {
       this.uploadedImage = e.target?.result as string;
-      this.simulateAnalysis();
+      this.analyzeImage(file.type);
     };
     reader.readAsDataURL(file);
   }
@@ -244,147 +165,28 @@ export class InsectDamge {
     const reader = new FileReader();
     reader.onload = (e) => {
       this.uploadedImage = e.target?.result as string;
-      this.simulateAnalysis();
+      this.analyzeImage(file.type);
     };
     reader.readAsDataURL(file);
   }
 
-  // ============================================================
-  // 🔧 GCP AI 整合點 #5: 主要分析方法
-  // ============================================================
-  // 目前狀態：Mock 模擬（2秒延遲）
-  // 完整整合指南：請參考 docs/GEMINI_VISION_INTEGRATION.md
-  // ============================================================
-  /**
-   * 蟲害分析方法
-   *
-   * 整合步驟：
-   * 1. 取消註解整合點 #1-4 的程式碼
-   * 2. 刪除下方的 setTimeout Mock 程式碼（Line 267-280）
-   * 3. 取消註解 Gemini API 整合程式碼（Line 282-327）
-   * 4. 測試並部署
-   */
-  private simulateAnalysis(): void {
+  private analyzeImage(mimeType: string): void {
     this.currentState = AnalysisState.LOADING;
+    this.cdr.markForCheck();
 
-    // ============================================================
-    // ❌ Mock 程式碼（整合時請刪除此段）
-    // ============================================================
-    setTimeout(() => {
-      // Mock 診斷結果
-      this.currentAnalysis = {
-        type: '斑潛蠅',
-        severity: 'medium',
-        confidence: 89,
-        recommendations: [
-          '使用窄域油（礦物油）稀釋 200 倍噴灑葉背',
-          '清除受害嚴重葉片並銷毀',
-          '懸掛藍色黏板於葉面高度（每 10 坪 3 片）',
-          '避免過度施用氮肥，以免葉片過嫩'
-        ],
-        timestamp: new Date()
-      };
-
-      this.currentState = AnalysisState.SUCCESS;
-    }, 2000);
-
-    // ============================================================
-    // ✅ Gemini Vision API 整合程式碼（取消註解以啟用）
-    // 詳細說明：docs/GEMINI_VISION_INTEGRATION.md
-    // ============================================================
-    // // 準備 Gemini API Payload
-    // const payload: GeminiRequest = {
-    //   contents: [{
-    //     parts: [
-    //       { text: this.getGeminiPrompt() },
-    //       {
-    //         inline_data: {
-    //           mime_type: "image/jpeg",
-    //           data: this.uploadedImage!.split(',')[1] // 移除 data:image/jpeg;base64,
-    //         }
-    //       }
-    //     ]
-    //   }]
-    // };
-    //
-    // // 發送 HTTP POST 請求
-    // this.http.post<GeminiResponse>(this.GEMINI_API_URL, payload)
-    //   .pipe(
-    //     timeout(30000), // 30秒超時
-    //     map(response => {
-    //       // 解析 Gemini 回應
-    //       const text = response.candidates[0]?.content?.parts[0]?.text;
-    //       if (!text) throw new Error('無法取得分析結果');
-    //
-    //       // 清理 JSON（移除 markdown 格式）
-    //       const jsonText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    //       return JSON.parse(jsonText);
-    //     }),
-    //     catchError(error => {
-    //       console.error('Gemini API 錯誤:', error);
-    //       this.currentState = AnalysisState.ERROR;
-    //
-    //       // 使用者友善的錯誤訊息
-    //       let errorMessage = '分析失敗，請稍後再試';
-    //       if (error.name === 'TimeoutError') errorMessage = '分析超時，請稍後再試';
-    //       else if (error.status === 0) errorMessage = '無法連線至 AI 服務';
-    //       else if (error.status === 429) errorMessage = 'API 配額已用盡';
-    //       else if (error.status === 400) errorMessage = '圖片格式不支援';
-    //
-    //       alert(errorMessage);
-    //       return throwError(() => error);
-    //     })
-    //   )
-    //   .subscribe((result: any) => {
-    //     this.currentAnalysis = {
-    //       type: result.type || '未知蟲害',
-    //       severity: result.severity || 'medium',
-    //       confidence: result.confidence || 0,
-    //       recommendations: result.recommendations || [],
-    //       timestamp: new Date()
-    //     };
-    //     this.currentState = AnalysisState.SUCCESS;
-    //   });
+    this.geminiVision.analyzeImage(this.uploadedImage!, mimeType).subscribe({
+      next: (result) => {
+        this.currentAnalysis = result;
+        this.currentState = AnalysisState.SUCCESS;
+        this.cdr.markForCheck();
+      },
+      error: (err: Error) => {
+        this.currentState = AnalysisState.ERROR;
+        this.dialogService.showError(err.message, '分析失敗');
+        this.cdr.markForCheck();
+      }
+    });
   }
-
-  // ============================================================
-  // 🔧 Gemini Prompt（取消註解以啟用）
-  // ============================================================
-  /**
-   * 建立 Gemini Vision 分析 Prompt
-   * 可根據需求調整 Prompt 以優化分析結果
-   */
-  // private getGeminiPrompt(): string {
-  //   return `
-  // 你是一位專業的農業病蟲害診斷專家。請仔細分析這張農作物圖片，判斷是否有蟲害問題。
-  //
-  // 請以 **純 JSON 格式** 回傳結果（不要包含 markdown 格式符號如 \`\`\`json）：
-  //
-  // {
-  //   "type": "蟲害名稱（如：蚜蟲、斑潛蠅、斜紋夜蛾、未偵測到蟲害）",
-  //   "severity": "low 或 medium 或 high",
-  //   "confidence": 數字（0-100，表示信心指數）,
-  //   "recommendations": [
-  //     "具體且實用的防治建議1",
-  //     "具體且實用的防治建議2",
-  //     "具體且實用的防治建議3"
-  //   ]
-  // }
-  //
-  // 評估標準：
-  // - **low（輕微）**: 少量蟲害，不影響作物生長，可自然防治
-  // - **medium（中度）**: 可見蟲害跡象，需要處理以避免擴散
-  // - **high（嚴重）**: 大量蟲害，緊急需要處理，可能影響收成
-  //
-  // 防治建議要求：
-  // 1. 優先推薦有機或低毒性防治方法
-  // 2. 提供具體的藥劑名稱和使用方式
-  // 3. 包含物理或生物防治方法
-  // 4. 考慮台灣氣候條件
-  //
-  // 請確保回應是有效的 JSON 格式。
-  // `.trim();
-  // }
 
   /**
    * 重新上傳

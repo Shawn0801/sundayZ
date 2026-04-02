@@ -22,4 +22,6 @@ export interface Environment {
   production: boolean;
   firebase: FirebaseConfig;
   vertexAI?: VertexAIConfig;
+  geminiApiKey?: string;
+  geminiModel?: string;
 }
